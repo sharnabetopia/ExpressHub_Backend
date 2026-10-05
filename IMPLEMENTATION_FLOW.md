@@ -549,23 +549,40 @@ Implemented schema: `prisma/schema.prisma`. Migration এখনো তৈরি/
 
 ### Step 5: Prisma migration and model setup
 
-1. Write Prisma schema in `prisma/schema.prisma`
-2. Update `DATABASE_URL` in `.env`
-3. Run Prisma migration
-4. Generate Prisma client
-5. Verify database connection
+Initial Prisma migration তৈরি ও configured PostgreSQL database-এ apply করা হয়েছে।
 
-Commands:
+Migration:
 
 ```bash
-npx prisma migrate dev --name init
-npx prisma generate
+npm run prisma:migrate:status
+npm run prisma:generate
 ```
 
-Next.js + Prisma best practice:
-- Keep Prisma client instance in `lib/prisma.ts`
-- Use server-only code for DB operations
-- Avoid calling Prisma from client components
+Applied migration directory: `prisma/migrations/20261005051352_init/`.
+
+Workflow for future schema changes:
+
+```bash
+# Local development: create and apply a named migration
+npx prisma migrate dev --name describe_change
+
+# Production: apply only checked-in migrations
+npm run prisma:migrate:deploy
+```
+
+Production deployment never runs `prisma migrate dev`; migration SQL is reviewed and committed before deployment. Do not reset a database containing data to resolve migration-history errors. Back up the database and investigate/baseline its state instead.
+
+Next.js + Prisma rules:
+- Reuse the server-only Prisma singleton in `lib/prisma.ts`.
+- Keep Prisma operations on the Node.js server runtime; never bundle Prisma into client code.
+- `DATABASE_URL` must be configured privately in local/deployment environment.
+
+Step-5 verification:
+- [x] Migration generated and applied.
+- [x] Prisma reports database schema up to date.
+- [x] Expected domain tables are present in PostgreSQL.
+- [x] Prisma client generation completed.
+- [x] Application TypeScript check and production build pass.
 
 ---
 
