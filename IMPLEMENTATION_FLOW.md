@@ -617,6 +617,38 @@ Role guard examples:
 
 Refresh/logout routes use the HttpOnly refresh cookie, rotate/revoke the stored token hash, and apply CSRF protections. Protected API routes must verify auth server-side; do not rely on client-side checks or a routing proxy alone.
 
+#### Implemented Step-6 behavior
+
+- Registration accepts only name, email, password and optional phone; role is always `CUSTOMER`. Zod rejects unknown fields and normalizes email.
+- Passwords use bcryptjs cost 12, with a 12-character minimum and bcrypt's 72-byte maximum.
+- Access JWT is HS256, 15 minutes, and includes issuer/audience/type. `JWT_ACCESS_SECRET` must be at least 32 bytes.
+- Refresh tokens are 256-bit random values; only SHA-256 hashes are stored. Tokens rotate atomically, expire after 30 days, and are revoked at logout.
+- Refresh token is HttpOnly, SameSite=Lax, Secure in production, and scoped to `/api/v1/auth`.
+- Login uses a generic invalid-credentials response, checks active/non-deleted account state, and records an audit event.
+- `requireUser()` verifies the bearer token and reloads current user role/activity from PostgreSQL; `requireRole()` enforces allowed roles server-side.
+- `/api/v1/users/me` is protected and returns only a safe user profile.
+- Register/login/refresh/logout have per-client rate limits. Local development warns and uses an in-process fallback; production requires Upstash.
+- Cookie endpoints validate any supplied Origin against `ALLOWED_ORIGIN` (local default: `http://localhost:3000`).
+- A one-time Prisma seed provisions the first Admin from `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`; it refuses to promote an existing customer or create a second admin.
+- The refresh endpoint returns 401 when its cookie is absent or invalid and clears invalid/expired cookies rather than returning a success-shaped response.
+- `npm run prisma:seed` uses a PostgreSQL advisory lock to prevent concurrent first-admin bootstrap; configure temporary bootstrap credentials in the private environment and remove them afterward.
+- Auth request bodies require `application/json` and are streamed with a 16 KiB maximum; missing production rate-limit configuration returns HTTP 503 rather than silently bypassing protection.
+- Email is trimmed and lowercased before validation. Auth responses use `Cache-Control: no-store`; browser cookie requests without Origin reject cross-site fetch metadata, and rejected origins do not clear the refresh cookie.
+- Repeatable verification: `npm run test:auth` (Node.js 24 helper regression tests), `npm run test:auth:integration` (development database/API lifecycle and concurrent rotation test), `npm run typecheck`, and `npm run build`. Integration tests create and remove a unique test account; use a development/test database.
+- Setup and request examples: `docs/authentication.md`.
+
+#### Step-6 acceptance checklist
+
+- [x] Register/login/logout/refresh Route Handlers and input schemas.
+- [x] Fixed-role registration, password hashing, safe user responses.
+- [x] Access-token authentication and reusable role guard.
+- [x] Hashed refresh-token storage, rotation, expiry, revocation and cookie handling.
+- [x] Rate limits and cookie-origin check.
+- [x] Protected `GET /api/v1/users/me`.
+- [x] Safe one-time initial Admin bootstrap.
+- [x] End-to-end register/profile/refresh rotation and replay rejection/login/logout/revocation tested using a temporary smoke-test account, then removed.
+- [ ] Set a private `JWT_ACCESS_SECRET` in local/deployment environment and configure Upstash before production auth use.
+
 ---
 
 ### Step 7: User profile APIs

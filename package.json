@@ -7,10 +7,16 @@
     "build": "prisma generate && next build",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
+    "test:auth": "node --test tests/auth.test.mjs",
+    "test:auth:integration": "node tests/auth.integration.mjs",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
-    "prisma:migrate:status": "prisma migrate status"
+    "prisma:migrate:status": "prisma migrate status",
+    "prisma:seed": "node prisma/seed.mjs"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +35,7 @@
     "@upstash/ratelimit": "^2.2.0",
     "@upstash/redis": "^1.39.0",
     "bcryptjs": "^3.0.3",
+    "dotenv": "^18.0.5",
     "jsonwebtoken": "^9.0.3",
     "next": "^16.3.8",
     "react": "^19.3.0",
