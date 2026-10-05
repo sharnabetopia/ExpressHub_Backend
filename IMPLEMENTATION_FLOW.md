@@ -711,9 +711,31 @@ Shipment flow:
 6. Assign courier if needed
 7. Update shipment status through valid transition rules
 
-Example valid transitions:
+Valid transitions (Step-1 business rules are authoritative):
 - CREATED -> PICKED_UP -> IN_TRANSIT -> OUT_FOR_DELIVERY -> DELIVERED
-- FAILED -> RETURNED -> CANCELLED (depending on business rule)
+- OUT_FOR_DELIVERY -> FAILED
+- FAILED -> IN_TRANSIT (Admin retry) or RETURNED (Admin)
+- CREATED -> CANCELLED (owner Customer or Admin); terminal states cannot transition further.
+
+#### Implemented Step-8 behavior
+
+- All seven shipment endpoints require Bearer auth; Customer ownership, assigned Courier scope and Admin access are enforced in services.
+- Strict booking validation rejects client-controlled ownership, price, currency and status. Tracking numbers use 96 random bits with bounded uniqueness retries.
+- Server quotes use exactly one active, effective database weight-tier rule with decimal arithmetic; price/currency are snapshotted. Missing/ambiguous pricing returns 503 until valid rates are configured.
+- Admin assignment requires an active Courier and expected current courier ID. Assignment/reassignment is allowed in CREATED or FAILED.
+- Status changes require expected current status; operational transitions require confirmed payment and an active assigned Courier. Only Admins retry/return failures, and Customers only cancel before pickup.
+- Delivery confirmation/failure/return notes are required and stored internally; successful delivery sets the server timestamp.
+- Serializable transactions atomically save mutations, actor-attributed shipment events and audit entries, with conflict retries and current account/role checks.
+- Lists/search support role-scoped pagination, status/payment/date filters and allow-listed sorting, excluding soft-deleted shipments.
+- Setup, examples, pricing formula and test instructions: `docs/shipments.md`. No schema migration is needed; payment integration remains Step 9.
+
+#### Step-8 acceptance checklist
+
+- [x] Creation, detail, lists, own shipments and scoped search.
+- [x] Server pricing, unique tracking number and initial history/audit.
+- [x] Admin assignment, payment gate, authorized lifecycle transitions and terminal-state guards.
+- [x] Atomic history/audit and concurrent assignment/status protection.
+- [x] Shipment integration tests, TypeScript and production build verified.
 
 ---
 

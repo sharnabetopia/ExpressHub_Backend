@@ -10,6 +10,7 @@
     "test:auth": "node --test tests/auth.test.mjs",
     "test:auth:integration": "node tests/auth.integration.mjs",
     "test:users:integration": "node tests/users.integration.mjs",
+    "test:shipments:integration": "node tests/shipments.integration.mjs",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
