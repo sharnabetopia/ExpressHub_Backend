@@ -489,59 +489,61 @@ Step-3 source setup ও smoke-test complete। Local database connection যা�
 
 ### Step 4: Database data model design
 
-Design main models in Prisma:
+Step-4-এ domain model ও database constraint নির্ধারণ করে `prisma/schema.prisma`-এ লেখা হয়েছে। এই schema-তেই migration তৈরি হবে; migration apply করা Step-5-এর কাজ।
 
-#### User
-- id
-- name
-- email
-- passwordHash
-- role
-- phone
-- isActive
-- createdAt
-- updatedAt
-- deletedAt
+#### 4.1 Models
 
-#### Shipment
-- id
-- trackingNumber
-- customerId
-- courierId
-- pickupAddress
-- deliveryAddress
-- packageDescription
-- parcelWeight
-- status
-- paymentStatus
-- price
-- createdAt
-- updatedAt
-- deliveredAt
-- deletedAt
+| Model | উদ্দেশ্য |
+|---|---|
+| `User` | Customer/Courier/Admin identity, normalized email, password hash, active/soft-delete state |
+| `Shipment` | tracking, customer/courier, pickup/delivery contacts and addresses, parcel dimensions/weight, price/currency snapshot, current shipment/payment status, scheduling |
+| `Hub` | Admin-managed hub, code, address/zone এবং active/soft-delete state |
+| `ShipmentEvent` | status change, courier assignment, hub transfer ও delivery attempt timeline; public ও internal note আলাদা |
+| `Payment` | shipment/payer, provider, amount/currency, idempotency key, provider reference, payment/refund status ও timestamps |
+| `PaymentWebhookEvent` | unique provider event ID, payload hash, processing state; duplicate webhook idempotency |
+| `RefreshToken` | user-bound refresh-token hash, expiry, revocation ও last-used state |
+| `PricingRule` | weight-tier base fee/per-kg fee, currency, validity window, active state এবং optional creator |
+| `AuditLog` | actor, entity/action, optional shipment/payment link, structured before/after details |
 
-#### Payment
-- id
-- shipmentId
-- payerId
-- provider
-- providerRef
-- amount
-- status
-- createdAt
-- updatedAt
+#### 4.2 Enums and relationships
 
-#### AuditLog
-- id
-- userId
-- shipmentId
-- action
-- details
-- createdAt
+- `UserRole`: ঠিক `CUSTOMER`, `COURIER`, `ADMIN`।
+- `ShipmentStatus`: `CREATED`, `PICKED_UP`, `IN_TRANSIT`, `OUT_FOR_DELIVERY`, `DELIVERED`, `FAILED`, `RETURNED`, `CANCELLED`।
+- `PaymentStatus`: `PENDING`, `PAID`, `FAILED`, `REFUND_PENDING`, `REFUNDED`।
+- `PaymentProvider`: `STRIPE`, `SSLCOMMERZ`, `BKASH`; বাস্তবে একটিমাত্র provider Step-9-এ নির্বাচন/চালু হবে।
+- `ShipmentEventType`, `AuditEntityType`, `WebhookProcessingStatus` timeline, audit এবং callback process-এর event category রাখে।
+- User-এর customer/courier shipment relation আলাদা named relation।
+- Shipment-এর origin/destination/current hub relation আলাদা named relation।
+- Shipment-এর বহু event, payment ও audit log থাকতে পারে; payer ও actor nullable/set-null policy অনুযায়ী history অক্ষুণ্ণ থাকে।
 
-Status enums:
-- ShipmentStatus: CREATED, PICKED_UP, IN_TRANSIT, OUT_FOR_DELIVERY, DELIVERED, FAILED, RETURNED, CANCELLED
-- PaymentStatus: PENDING, PAID, FAILED, REFUNDED
+#### 4.3 Database integrity, soft delete and indexes
+
+- `id` primary key, tracking number, user email, hub code, refresh-token hash, payment idempotency key এবং provider reference-এ unique constraint।
+- Webhook deduplication-এর জন্য `(provider, providerEventId)` composite unique constraint।
+- User ও Shipment soft-delete timestamp দিয়ে archive হবে; Hub-ও soft-delete-capable। History/payment/audit record hard-delete করা হবে না।
+- Foreign-key delete policy shipment/payment history রক্ষা করে: customer/payment reference restrict, courier/hub/actor reference প্রয়োজনে set-null, refresh session user delete-এ cascade।
+- List/query pattern-এর জন্য role, customer, courier, shipment status, payment status, hub, event time, audit actor/entity এবং webhook processing state-এ index আছে।
+- Email lowercase/trim করে service layer-এ save করতে হবে; এতে unique constraint একই email-এর case variants ঠেকাতে পারে।
+
+#### 4.4 Domain rules যা Prisma schema একা enforce করতে পারে না
+
+- Shipment status transitions এবং role/ownership authorization service-এ enforce হবে।
+- একই shipment-এ একাধিক successful payment না হওয়া transaction ও business check দিয়ে enforce করতে হবে।
+- Pricing rule weight range overlap বা multiple active match যেন না হয়, admin service-এ validate করতে হবে।
+- Amount, weight, dimensions, currency এবং schedule-এর valid ranges Zod/service validation-এ enforce করতে হবে।
+- User/Shipment/Hub soft delete query-তে `deletedAt: null` filter service-এ বাধ্যতামূলক হবে।
+- Payment provider call schema transaction-এর অংশ নয়; verified callback-এর পরে DB state transaction-এ update হবে।
+
+#### 4.5 Step-4 completion checklist
+
+- [x] Step-1-এর fixed 3-role model-এ `HUB_MANAGER` বাদ।
+- [x] Shipment lifecycle, tracking timeline, hub transfer ও soft delete-এর data model।
+- [x] Real provider payment, callback idempotency, refresh-token hash ও audit history model।
+- [x] Price/currency snapshot, weight-tier pricing, relational constraints සහ query indexes।
+- [x] Prisma formatting, schema validation ও client generation সফল।
+- [ ] Schema migration create/apply ও database-side verification Step-5-এ হবে।
+
+Implemented schema: `prisma/schema.prisma`. Migration এখনো তৈরি/apply করা হয়নি।
 
 ---
 

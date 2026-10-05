@@ -10,7 +10,6 @@ datasource db {
 enum UserRole {
   CUSTOMER
   COURIER
-  HUB_MANAGER
   ADMIN
 }
 
@@ -29,81 +28,265 @@ enum PaymentStatus {
   PENDING
   PAID
   FAILED
+  REFUND_PENDING
   REFUNDED
 }
 
+enum PaymentProvider {
+  STRIPE
+  SSLCOMMERZ
+  BKASH
+}
+
+enum ShipmentEventType {
+  CREATED
+  COURIER_ASSIGNED
+  STATUS_CHANGED
+  HUB_TRANSFER
+  DELIVERY_ATTEMPT
+  CUSTOMER_CANCELLED
+  ADMIN_CORRECTION
+}
+
+enum AuditEntityType {
+  USER
+  SHIPMENT
+  PAYMENT
+  HUB
+  PRICING_RULE
+}
+
+enum WebhookProcessingStatus {
+  RECEIVED
+  PROCESSED
+  IGNORED
+  FAILED
+}
+
 model User {
-  id            String    @id @default(cuid())
-  name          String
-  email         String    @unique
-  passwordHash  String
-  role          UserRole  @default(CUSTOMER)
-  phone         String?
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         UserRole  @default(CUSTOMER)
+  phone        String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
 
-  shipments     Shipment[] @relation("ShipmentCustomer")
-  assignedShipments Shipment[] @relation("ShipmentCourier")
-  auditLogs     AuditLog[]
-  payments      Payment[]
+  customerShipments Shipment[]      @relation("ShipmentCustomer")
+  courierShipments  Shipment[]      @relation("ShipmentCourier")
+  payments          Payment[]
+  refreshTokens     RefreshToken[]
+  shipmentEvents    ShipmentEvent[]
+  auditLogs         AuditLog[]      @relation("AuditActor")
+  pricingRules      PricingRule[]   @relation("PricingRuleCreator")
 
+  @@index([role, isActive, deletedAt])
+  @@index([createdAt])
   @@map("users")
 }
 
 model Shipment {
-  id                String         @id @default(cuid())
-  trackingNumber    String         @unique
-  customerId        String
-  courierId         String?
-  pickupAddress    String
-  deliveryAddress  String
+  id               String  @id @default(cuid())
+  trackingNumber   String  @unique
+  customerId       String
+  courierId        String?
+  originHubId      String?
+  destinationHubId String?
+  currentHubId     String?
+
+  pickupContactName    String
+  pickupContactPhone   String
+  pickupAddress        String
+  deliveryContactName  String
+  deliveryContactPhone String
+  deliveryAddress      String
+
   packageDescription String?
-  parcelWeight      Decimal? @db.Decimal(10, 2)
-  status            ShipmentStatus @default(CREATED)
-  paymentStatus     PaymentStatus @default(PENDING)
-  price             Decimal? @db.Decimal(10, 2)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  deliveredAt       DateTime?
-  deletedAt         DateTime?
+  parcelWeightKg     Decimal        @db.Decimal(10, 3)
+  parcelLengthCm     Decimal?       @db.Decimal(10, 2)
+  parcelWidthCm      Decimal?       @db.Decimal(10, 2)
+  parcelHeightCm     Decimal?       @db.Decimal(10, 2)
+  price              Decimal        @db.Decimal(12, 2)
+  currency           String         @default("BDT") @db.VarChar(3)
+  status             ShipmentStatus @default(CREATED)
+  paymentStatus      PaymentStatus  @default(PENDING)
+  pickupScheduledAt  DateTime?
+  deliveredAt        DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  deletedAt          DateTime?
 
-  customer          User @relation("ShipmentCustomer", fields: [customerId], references: [id])
-  courier           User? @relation("ShipmentCourier", fields: [courierId], references: [id])
-  payments          Payment[]
-  auditLogs         AuditLog[]
+  customer User  @relation("ShipmentCustomer", fields: [customerId], references: [id], onDelete: Restrict)
+  courier  User? @relation("ShipmentCourier", fields: [courierId], references: [id], onDelete: SetNull)
 
+  originHub      Hub? @relation("ShipmentOriginHub", fields: [originHubId], references: [id], onDelete: SetNull)
+  destinationHub Hub? @relation("ShipmentDestinationHub", fields: [destinationHubId], references: [id], onDelete: SetNull)
+  currentHub     Hub? @relation("ShipmentCurrentHub", fields: [currentHubId], references: [id], onDelete: SetNull)
+
+  events    ShipmentEvent[]
+  payments  Payment[]
+  auditLogs AuditLog[]
+
+  @@index([customerId, createdAt])
+  @@index([courierId, status, createdAt])
+  @@index([status, createdAt])
+  @@index([paymentStatus, status])
+  @@index([originHubId])
+  @@index([destinationHubId])
+  @@index([currentHubId, status])
+  @@index([deletedAt])
   @@map("shipments")
 }
 
+model Hub {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  name      String
+  address   String
+  zoneCode  String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  originShipments      Shipment[]      @relation("ShipmentOriginHub")
+  destinationShipments Shipment[]      @relation("ShipmentDestinationHub")
+  currentShipments     Shipment[]      @relation("ShipmentCurrentHub")
+  outgoingEvents       ShipmentEvent[] @relation("EventOriginHub")
+  incomingEvents       ShipmentEvent[] @relation("EventDestinationHub")
+
+  @@index([zoneCode, isActive, deletedAt])
+  @@map("hubs")
+}
+
+model ShipmentEvent {
+  id               String            @id @default(cuid())
+  shipmentId       String
+  actorId          String?
+  type             ShipmentEventType
+  fromStatus       ShipmentStatus?
+  toStatus         ShipmentStatus?
+  originHubId      String?
+  destinationHubId String?
+  publicNote       String?
+  internalNote     String?
+  occurredAt       DateTime          @default(now())
+  createdAt        DateTime          @default(now())
+
+  shipment       Shipment @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
+  actor          User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  originHub      Hub?     @relation("EventOriginHub", fields: [originHubId], references: [id], onDelete: SetNull)
+  destinationHub Hub?     @relation("EventDestinationHub", fields: [destinationHubId], references: [id], onDelete: SetNull)
+
+  @@index([shipmentId, occurredAt])
+  @@index([actorId, occurredAt])
+  @@map("shipment_events")
+}
+
 model Payment {
-  id              String        @id @default(cuid())
-  shipmentId      String
-  payerId         String
-  provider        String
-  providerRef     String?
-  amount          Decimal       @db.Decimal(10, 2)
-  status          PaymentStatus @default(PENDING)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                String          @id @default(cuid())
+  shipmentId        String
+  payerId           String
+  provider          PaymentProvider
+  providerReference String?         @unique
+  idempotencyKey    String          @unique
+  amount            Decimal         @db.Decimal(12, 2)
+  currency          String          @default("BDT") @db.VarChar(3)
+  status            PaymentStatus   @default(PENDING)
+  paidAt            DateTime?
+  refundedAt        DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
-  shipment        Shipment      @relation(fields: [shipmentId], references: [id])
-  payer           User          @relation(fields: [payerId], references: [id])
+  shipment      Shipment              @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
+  payer         User                  @relation(fields: [payerId], references: [id], onDelete: Restrict)
+  webhookEvents PaymentWebhookEvent[]
+  auditLogs     AuditLog[]
 
+  @@index([shipmentId, status, createdAt])
+  @@index([payerId, createdAt])
+  @@index([provider, status, createdAt])
   @@map("payments")
 }
 
+model PaymentWebhookEvent {
+  id               String                  @id @default(cuid())
+  provider         PaymentProvider
+  providerEventId  String
+  paymentId        String?
+  eventType        String
+  payloadHash      String
+  processingStatus WebhookProcessingStatus @default(RECEIVED)
+  receivedAt       DateTime                @default(now())
+  processedAt      DateTime?
+
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, providerEventId])
+  @@index([paymentId, receivedAt])
+  @@index([processingStatus, receivedAt])
+  @@map("payment_webhook_events")
+}
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([expiresAt, revokedAt])
+  @@map("refresh_tokens")
+}
+
+model PricingRule {
+  id                 String    @id @default(cuid())
+  name               String
+  minWeightKg        Decimal   @db.Decimal(10, 3)
+  maxWeightKg        Decimal   @db.Decimal(10, 3)
+  baseFee            Decimal   @db.Decimal(12, 2)
+  additionalPerKgFee Decimal   @default(0) @db.Decimal(12, 2)
+  currency           String    @default("BDT") @db.VarChar(3)
+  isActive           Boolean   @default(true)
+  effectiveFrom      DateTime  @default(now())
+  effectiveTo        DateTime?
+  createdById        String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  createdBy User? @relation("PricingRuleCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([isActive, effectiveFrom, effectiveTo])
+  @@index([minWeightKg, maxWeightKg])
+  @@map("pricing_rules")
+}
+
 model AuditLog {
-  id          String   @id @default(cuid())
-  userId      String?
-  shipmentId  String?
-  action      String
-  details     Json?
-  createdAt   DateTime @default(now())
+  id         String          @id @default(cuid())
+  actorId    String?
+  entityType AuditEntityType
+  entityId   String
+  shipmentId String?
+  paymentId  String?
+  action     String
+  details    Json?
+  createdAt  DateTime        @default(now())
 
-  user        User?    @relation(fields: [userId], references: [id])
-  shipment    Shipment? @relation(fields: [shipmentId], references: [id])
+  actor    User?     @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  shipment Shipment? @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
+  payment  Payment?  @relation(fields: [paymentId], references: [id], onDelete: SetNull)
 
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([shipmentId, createdAt])
+  @@index([paymentId, createdAt])
   @@map("audit_logs")
 }
