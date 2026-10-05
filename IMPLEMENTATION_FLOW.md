@@ -660,12 +660,32 @@ Implement:
 - GET /api/v1/users/:id
 - PATCH /api/v1/users/:id/role (Admin only)
 - GET /api/v1/users (Admin only, with pagination/filter)
+- PATCH /api/v1/users/:id/status (Admin only, activate/deactivate)
 
 Responsibilities:
 - fetch user profile
 - edit profile details
 - update role
 - manage active/inactive status
+
+#### Implemented Step-7 behavior
+
+- All user endpoints require Bearer authentication. Profile lookup by ID allows the owner or an Admin; other users receive 404.
+- Self-service profile updates accept only name, normalized email and nullable phone. Empty updates, unknown fields and privilege changes are rejected; duplicate email returns 409.
+- Safe profile responses include phone, role, active status and timestamps, never password hashes or refresh sessions.
+- Admin user listing supports bounded pagination, role/active filters, name/email/phone search, and allow-listed sorting with a stable ID tie-breaker. All reads and changes exclude soft-deleted users.
+- Role and active-status changes require a current active Admin. Admins cannot change their own access; no-op changes succeed without additional audit entries.
+- Profile/access writes and before/after audit entries are atomic. Serializable transactions retry conflicts and recheck the actor's current authority to prevent stale concurrent Admin changes.
+- Role changes and deactivation revoke stored refresh sessions. Bearer requests use the current database role/activity; reactivation does not restore revoked refresh sessions.
+- No schema migration is required. API examples and operational details: `docs/users.md`.
+
+#### Step-7 acceptance checklist
+
+- [x] Own profile read/update and owner-or-Admin lookup by ID.
+- [x] Admin role and active-status management with strict validation.
+- [x] Admin pagination, filtering, search and sorting.
+- [x] Safe responses, soft-delete exclusion, session revocation and atomic audit logs.
+- [x] API/database integration coverage, TypeScript check and production build.
 
 ---
 
