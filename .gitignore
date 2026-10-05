@@ -4,3 +4,7 @@ dist
 .env.*
 !.env.example
 /generated/prisma
+.next
+out
+next-env.d.ts
+*.tsbuildinfo
