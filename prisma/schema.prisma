@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  COURIER
+  HUB_MANAGER
+  ADMIN
+}
+
+enum ShipmentStatus {
+  CREATED
+  PICKED_UP
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED
+  RETURNED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  role          UserRole  @default(CUSTOMER)
+  phone         String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  shipments     Shipment[] @relation("ShipmentCustomer")
+  assignedShipments Shipment[] @relation("ShipmentCourier")
+  auditLogs     AuditLog[]
+  payments      Payment[]
+
+  @@map("users")
+}
+
+model Shipment {
+  id                String         @id @default(cuid())
+  trackingNumber    String         @unique
+  customerId        String
+  courierId         String?
+  pickupAddress    String
+  deliveryAddress  String
+  packageDescription String?
+  parcelWeight      Decimal? @db.Decimal(10, 2)
+  status            ShipmentStatus @default(CREATED)
+  paymentStatus     PaymentStatus @default(PENDING)
+  price             Decimal? @db.Decimal(10, 2)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  deliveredAt       DateTime?
+  deletedAt         DateTime?
+
+  customer          User @relation("ShipmentCustomer", fields: [customerId], references: [id])
+  courier           User? @relation("ShipmentCourier", fields: [courierId], references: [id])
+  payments          Payment[]
+  auditLogs         AuditLog[]
+
+  @@map("shipments")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  shipmentId      String
+  payerId         String
+  provider        String
+  providerRef     String?
+  amount          Decimal       @db.Decimal(10, 2)
+  status          PaymentStatus @default(PENDING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  shipment        Shipment      @relation(fields: [shipmentId], references: [id])
+  payer           User          @relation(fields: [payerId], references: [id])
+
+  @@map("payments")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  shipmentId  String?
+  action      String
+  details     Json?
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id])
+  shipment    Shipment? @relation(fields: [shipmentId], references: [id])
+
+  @@map("audit_logs")
+}
