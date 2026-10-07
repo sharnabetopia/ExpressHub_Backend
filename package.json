@@ -15,6 +15,7 @@
     "test:payments:integration": "node tests/payments.integration.mjs",
     "test:admin:integration": "node tests/admin.integration.mjs",
     "test:lists:integration": "node tests/lists.integration.mjs",
+    "test:soft-delete:integration": "node tests/soft-delete.integration.mjs",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",

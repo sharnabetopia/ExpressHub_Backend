@@ -159,3 +159,28 @@ export async function updateShipmentStatus(actor: AuthenticatedUser, id: string,
     return shipment;
   });
 }
+
+export async function softDeleteShipment(actor: AuthenticatedUser, id: string, reason: string) {
+  requireRole(actor, "ADMIN");
+  return transaction(async (tx) => {
+    requireRole(await currentActor(tx, actor), "ADMIN");
+    const before = await tx.shipment.findFirst({ where: { id, deletedAt: null } });
+    if (!before) throw missing();
+    if (!["DELIVERED", "RETURNED", "CANCELLED"].includes(before.status)) {
+      throw conflict("Complete, return or cancel this shipment before deleting it");
+    }
+    if (before.paymentStatus === "REFUND_PENDING" || await tx.payment.findFirst({
+      where: { shipmentId: id, status: { in: ["PENDING", "REFUND_PENDING"] } }, select: { id: true },
+    })) throw conflict("Resolve pending payments or refunds before deleting this shipment");
+    const deletedAt = new Date();
+    await tx.shipment.update({ where: { id }, data: { deletedAt } });
+    // Deletion archives the record, not a delivery-state transition. Keep the
+    // existing shipment timeline intact and record the administrative action.
+    await tx.auditLog.create({ data: {
+      actorId: actor.id, entityType: "SHIPMENT", entityId: id, shipmentId: id, action: "SHIPMENT_SOFT_DELETED",
+      details: { reason, before: { deletedAt: null, status: before.status },
+        after: { deletedAt: deletedAt.toISOString(), status: before.status } },
+    } });
+    return { id, deletedAt };
+  });
+}

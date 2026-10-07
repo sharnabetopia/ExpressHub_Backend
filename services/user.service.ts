@@ -117,3 +117,31 @@ export async function updateUserAccess(
     return user;
   });
 }
+
+export async function softDeleteUser(actor: AuthenticatedUser, id: string, reason: string) {
+  requireRole(actor, "ADMIN");
+  return mutateUser(async (tx) => {
+    await activeActor(tx, actor, true);
+    const before = await tx.user.findFirst({ where: { id, deletedAt: null }, select: profileSelect });
+    if (!before) throw notFound();
+    if (id === actor.id) throw new AppError(409, "An Admin cannot delete their own account", "SELF_ACCESS_CHANGE");
+    const activeShipment = await tx.shipment.findFirst({ where: {
+      deletedAt: null, status: { notIn: ["DELIVERED", "RETURNED", "CANCELLED"] },
+      OR: [{ customerId: id }, { courierId: id }],
+    }, select: { id: true } });
+    if (activeShipment) throw new AppError(409, "Resolve active shipments before deleting this user", "USER_CONFLICT");
+    const unresolvedPayment = await tx.payment.findFirst({ where: {
+      payerId: id, status: { in: ["PENDING", "REFUND_PENDING"] },
+    }, select: { id: true } });
+    if (unresolvedPayment) throw new AppError(409, "Resolve pending payments or refunds before deleting this user", "USER_CONFLICT");
+    const deletedAt = new Date();
+    await tx.user.update({ where: { id }, data: { deletedAt, isActive: false } });
+    await tx.refreshToken.updateMany({ where: { userId: id, revokedAt: null }, data: { revokedAt: deletedAt } });
+    await tx.auditLog.create({ data: {
+      actorId: actor.id, entityType: "USER", entityId: id, action: "USER_SOFT_DELETED",
+      details: { reason, before: { isActive: before.isActive, deletedAt: null },
+        after: { isActive: false, deletedAt: deletedAt.toISOString() } },
+    } });
+    return { id, deletedAt };
+  });
+}

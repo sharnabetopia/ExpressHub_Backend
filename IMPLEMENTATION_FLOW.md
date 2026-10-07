@@ -863,7 +863,7 @@ Implement logic:
 
 #### Soft delete
 - Instead of hard delete, set `deletedAt`
-- All queries should include `deletedAt: null`
+- Ordinary user/shipment queries include `deletedAt: null`; retained financial history, webhook reconciliation and Admin audit inspection intentionally keep deleted-target references.
 
 #### Audit log
 Record critical changes:
@@ -880,6 +880,24 @@ Every log should store:
 - action
 - details
 - createdAt
+
+#### Implemented Step-12 behavior
+
+- Admin-only `DELETE /api/v1/users/:id` and `DELETE /api/v1/shipments/:id` require a strict JSON reason and set a server-generated `deletedAt`; no application hard delete or cascade occurs.
+- User deletion blocks self-deletion, unresolved customer/courier shipments and pending payments/refunds. It deactivates the account, revokes refresh sessions and writes an audit entry atomically.
+- Shipment deletion is limited to DELIVERED, RETURNED and CANCELLED with no unresolved payment attempts/refunds. It preserves status, timeline, payments and history; cancellation/refund remains a separate business operation.
+- Serializable transactions recheck current Admin authority and retry conflicts. Audit failures roll back deletion/session changes; repeated deletion returns 404 without another audit entry.
+- Existing role, assignment, shipment lifecycle and payment audit logging is preserved. New actions are USER_SOFT_DELETED and SHIPMENT_SOFT_DELETED with reason and before/after timestamps.
+- Audit schema uses `actorId` for the acting user; `shipmentId` is nullable for user actions and system/payment events may have no actor. Retained audit records remain available through the Admin endpoint.
+- API contract, archival guards, retention exceptions and tests: `docs/soft-delete-audit.md`. No migration or environment change is needed.
+
+#### Step-12 acceptance checklist
+
+- [x] User and shipment soft-delete APIs with Admin access, reason validation and business guards.
+- [x] Session revocation, deleted-account authentication rejection and ordinary read/write exclusion.
+- [x] Atomic actor-attributed deletion audits with preserved shipment/payment/event history.
+- [x] Verified audit-failure rollback, concurrent/repeated deletion, terminal-state gates and current-role checks.
+- [x] PostgreSQL/Route Handler integration suite, TypeScript check and production build pass.
 
 ---
 
