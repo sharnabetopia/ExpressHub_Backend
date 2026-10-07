@@ -140,6 +140,9 @@ export async function updateShipmentStatus(actor: AuthenticatedUser, id: string,
     }
     if (before.status !== input.expectedStatus) throw conflict("Shipment status changed; reload the shipment");
     if (!transitions[before.status].includes(input.status)) throw conflict("Invalid shipment status transition");
+    if (input.status === "CANCELLED" && await tx.payment.findFirst({ where: { shipmentId: id, status: "PENDING" } })) {
+      throw conflict("Resolve or expire the pending Stripe checkout before cancelling the shipment");
+    }
     if (!["CANCELLED", "RETURNED"].includes(input.status)) {
       if (before.paymentStatus !== "PAID") throw conflict("Confirmed payment is required before pickup or dispatch");
       const courier = before.courierId && await tx.user.findFirst({

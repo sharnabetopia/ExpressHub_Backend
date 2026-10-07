@@ -192,6 +192,10 @@ model Payment {
   payerId           String
   provider          PaymentProvider
   providerReference String?         @unique
+  providerIntentId  String?         @unique
+  checkoutRequest   Json?
+  checkoutUrl       String?
+  checkoutExpiresAt DateTime?
   idempotencyKey    String          @unique
   amount            Decimal         @db.Decimal(12, 2)
   currency          String          @default("BDT") @db.VarChar(3)
