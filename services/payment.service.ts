@@ -90,7 +90,7 @@ export async function initiatePayment(actor: AuthenticatedUser, shipmentId: stri
       idempotencyKey, amount: shipment.price, currency: shipment.currency } });
     const metadata = { paymentId: created.id, shipmentId, payerId: actor.id };
     const params: Stripe.Checkout.SessionCreateParams = {
-      mode: "payment", payment_method_types: ["card"], client_reference_id: created.id,
+      mode: "payment", allowed_payment_method_types: ["card"], client_reference_id: created.id,
       success_url: config.successUrl, cancel_url: config.cancelUrl,
       expires_at: Math.floor(Date.now() / 1000) + 3600,
       metadata, payment_intent_data: { metadata },
@@ -195,12 +195,17 @@ export async function processStripeEvent(event: Stripe.Event, payloadHash: strin
       const savedReceipt = await tx.paymentWebhookEvent.findUniqueOrThrow({ where: key });
       if (savedReceipt.processingStatus === "PROCESSED") return;
       const current = await tx.payment.findUniqueOrThrow({ where: { id: payment.id }, include: { shipment: true } });
+      // Provider reads happen outside the transaction. A competing handler may
+      // have committed a newer observation while those reads were in flight.
+      if (current.updatedAt.getTime() !== payment.updatedAt.getTime()) {
+        throw new AppError(503, "Payment changed during verification; retry this event", "PAYMENT_RETRY");
+      }
       if (current.providerReference && current.providerReference !== session!.id) throw mismatch();
       if (current.providerIntentId && observed.intentId && current.providerIntentId !== observed.intentId) throw mismatch();
       if (!current.amount.equals(current.shipment.price) || current.currency !== current.shipment.currency || current.payerId !== current.shipment.customerId) throw mismatch();
       let status = observed.status;
       // Provider events are unordered. Never regress an accepted payment/refund.
-      if (current.status === "REFUNDED" || (current.status === "REFUND_PENDING" && status !== "REFUNDED") ||
+      if (current.status === "REFUNDED" || (current.status === "REFUND_PENDING" && ["PENDING", "FAILED"].includes(status)) ||
         (current.status === "PAID" && ["PENDING", "FAILED"].includes(status)) || (current.status === "FAILED" && status === "PENDING")) status = current.status;
       if (status !== "FAILED" && await tx.payment.findFirst({ where: { shipmentId: current.shipmentId, id: { not: current.id }, status: { not: "FAILED" } } })) {
         throw conflict("Shipment already has another active or confirmed payment");

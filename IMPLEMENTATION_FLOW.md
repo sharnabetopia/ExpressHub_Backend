@@ -763,6 +763,26 @@ Important:
 - No fake manual payment update
 - Payment flow must be real and secure
 
+#### Implemented Step-9 behavior
+
+- All four payment endpoints use Stripe Checkout, ownership checks, strict inputs, safe responses and bounded pagination. Initiation requires a UUID `Idempotency-Key`; browser CORS permits that header.
+- Server pricing is snapshotted into an exact minor-unit amount. The installed Stripe 23 SDK's `allowed_payment_method_types` field restricts checkout to cards.
+- Pending attempts reserve the shipment before the provider call; saved request parameters and provider idempotency keys support safe retries. The existing database partial unique index prevents multiple active/accepted payments per shipment.
+- Webhooks verify the raw-body signature, timestamp, account/mode, Checkout metadata, amount/currency and successful PaymentIntent. Provider calls stay outside database transactions.
+- Durable webhook receipts deduplicate events. Serializable transactions atomically update payment/shipment status and audit logs; stale concurrent observations are rejected for retry.
+- Verified expiry/failure allows another attempt. Pending checkout blocks shipment cancellation; return-page redirects cannot change payment status.
+- Provider refunds reconcile to REFUND_PENDING/REFUNDED; a failed refund with no refunded amount restores PAID. Refund creation is an authorized operator action in Stripe Dashboard, not a manual application status update.
+- Payment setup, API examples, reconciliation limits and real-provider acceptance instructions: `docs/payments.md`.
+
+#### Step-9 acceptance checklist
+
+- [x] Initiation, payment detail, own payment list and signed webhook Route Handlers.
+- [x] Real Stripe SDK adapter, exact pricing, ownership, rate limit and safe idempotent retries.
+- [x] Atomic settlement/audit, duplicate-event handling, stale-observation protection and refund reconciliation.
+- [x] Unit tests and PostgreSQL/service/Route Handler integration tests with an injected provider; fixtures removed after testing.
+- [x] TypeScript check and production build verified.
+- [ ] Configure private Stripe credentials/return URLs and webhook destination; complete an actual Stripe test-mode Checkout and refund acceptance run before deployment. Automated tests do not make provider charges.
+
 ---
 
 ### Step 10: Admin dashboard and operations

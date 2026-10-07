@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const allowedMethods = "GET, POST, PATCH, DELETE, OPTIONS";
-const allowedHeaders = "Authorization, Content-Type, X-CSRF-Token";
+const allowedHeaders = "Authorization, Content-Type, X-CSRF-Token, Idempotency-Key";
 
 export function proxy(request: NextRequest) {
   const origin = request.headers.get("origin");
