@@ -13,6 +13,7 @@
     "test:shipments:integration": "node tests/shipments.integration.mjs",
     "test:payments": "node --test tests/payments.test.mjs",
     "test:payments:integration": "node tests/payments.integration.mjs",
+    "test:admin:integration": "node tests/admin.integration.mjs",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",

@@ -803,6 +803,24 @@ Admin responsibilities:
 - monitor shipment status
 - inspect audit logs
 
+#### Implemented Step-10 behavior
+
+- All five Admin endpoints require an active, non-deleted Admin using the current database role; stale JWT role claims cannot preserve Admin access.
+- Dashboard statistics use one repeatable-read snapshot for user totals/activity/roles, shipment totals/statuses and payment counts/amounts. Operational counts exclude soft-deleted users/shipments; retained payment history remains included.
+- Active shipments include FAILED deliveries awaiting retry/return and exclude DELIVERED, RETURNED and CANCELLED. Payment amounts are exact decimal strings grouped by currency and status, not net revenue or refund amounts.
+- Admin user listing and role assignment reuse the existing safe user handlers, including strict validation, transaction-time authority checks, self-access protection, refresh-session revocation and atomic audit entries.
+- Admin shipment monitoring reuses the shipment list service behind an explicit Admin guard, with search, status/payment/date filters, bounded pagination and allow-listed sorting.
+- Audit inspection supports actor/entity/shipment/payment/action/date filters, bounded pagination and stable sorting. System actors may be null; history remains visible for soft-deleted actors/targets. No audit mutation endpoint is exposed.
+- Setup, response semantics and examples: `docs/admin.md`. No migration or new environment variables are required.
+
+#### Step-10 acceptance checklist
+
+- [x] Dashboard statistics, user list/role assignment, shipment list and audit-log Route Handlers.
+- [x] Admin-only access and current account/role checks for all five endpoints.
+- [x] Consistent dashboard snapshots, soft-delete/retention semantics and currency-separated decimal totals.
+- [x] Strict filters, safe user output, stable pagination and preserved role-change audit/session safeguards.
+- [x] PostgreSQL/Route Handler integration coverage, TypeScript check and production build verified.
+
 ---
 
 ### Step 11: Search, filter, sort, pagination
