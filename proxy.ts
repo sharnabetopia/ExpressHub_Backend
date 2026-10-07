@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { AppError } from "@/lib/http/errors";
+import { errorResponse } from "@/lib/http/responses";
 
 const allowedMethods = "GET, POST, PATCH, DELETE, OPTIONS";
 const allowedHeaders = "Authorization, Content-Type, X-CSRF-Token, Idempotency-Key";
@@ -9,7 +11,7 @@ export function proxy(request: NextRequest) {
 
   if (request.method === "OPTIONS") {
     if (!origin || !allowedOrigin || origin !== allowedOrigin) {
-      return new NextResponse(null, { status: 403 });
+      return errorResponse(new AppError(403, "Request origin is not allowed", "ORIGIN_NOT_ALLOWED"));
     }
 
     return new NextResponse(null, {

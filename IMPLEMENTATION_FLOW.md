@@ -930,6 +930,23 @@ Implement:
 - global error handler
 - not found route handler
 
+#### Implemented Step-13 behavior
+
+- Existing strict Zod schemas and bounded JSON/query validation remain the request boundary; Stripe retains raw-body signature verification.
+- Central `toErrorResponse` now formats Zod and application errors for all shared error responses. Route Handlers keep their existing catch/delegation pattern; no Express middleware is introduced.
+- Unexpected application exceptions return a generic 500 and are logged without raw exception contents. Validation responses retain field paths/messages and application errors retain their status/code.
+- An optional API catch-all returns JSON ENDPOINT_NOT_FOUND errors for unknown paths without shadowing real routes. HEAD preserves HTTP bodyless semantics.
+- Health responses and rejected CORS preflights now use shared JSON/no-store helpers. Approved OPTIONS requests remain empty 204 responses; existing-route unsupported methods retain Next.js's automatic 405 behavior.
+- Response contracts, protocol boundaries and verification instructions: `docs/validation-errors.md`.
+
+#### Step-13 acceptance checklist
+
+- [x] Shared validation and application-error formatting with consistent response envelopes.
+- [x] JSON API not-found handler, safe unexpected-error handling and no-store health/CORS errors.
+- [x] Unit coverage for body validation, field errors, status preservation, safe logging and rate-limit responses.
+- [x] Production HTTP tests for unknown paths, methods/HEAD, route precedence, health failures and CORS.
+- [x] Auth/payment regressions, TypeScript check and production build pass.
+
 ---
 
 ### Step 14: Security implementation

@@ -1,11 +1,11 @@
 import "server-only";
 
 import { NextResponse, type NextRequest } from "next/server";
-import { ZodError, type ZodType } from "zod";
+import { type ZodType } from "zod";
 
 import { isAllowedCookieRequest, refreshTokenCookie } from "@/lib/auth/tokens";
 import { AppError } from "@/lib/http/errors";
-import { errorResponse, tooManyRequestsResponse, validationErrorResponse } from "@/lib/http/responses";
+import { errorResponse, tooManyRequestsResponse } from "@/lib/http/responses";
 import { getRateLimitIdentifier, limitApiRequests } from "@/lib/rate-limit";
 
 export async function parseRequestBody<T>(request: Request, schema: ZodType<T>): Promise<T> {
@@ -79,10 +79,6 @@ export function ensureAllowedCookieOrigin(request: Request) {
 }
 
 export function handleRouteError(error: unknown) {
-  if (error instanceof ZodError) {
-    return validationErrorResponse(error);
-  }
-
   return errorResponse(error);
 }
 

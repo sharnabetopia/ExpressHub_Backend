@@ -34,19 +34,3 @@ export function tooManyRequestsResponse(reset: number) {
     },
   );
 }
-
-export function validationErrorResponse(error: {
-  issues: Array<{ path: PropertyKey[]; message: string }>;
-}) {
-  return NextResponse.json(
-    {
-      success: false,
-      message: "Request validation failed",
-      errors: error.issues.map((issue) => ({
-        path: issue.path.map(String).join("."),
-        message: issue.message,
-      })),
-    },
-    { status: 400, headers: { "Cache-Control": "no-store" } },
-  );
-}

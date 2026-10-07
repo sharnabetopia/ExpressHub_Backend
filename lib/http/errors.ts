@@ -1,4 +1,5 @@
 import "server-only";
+import { ZodError } from "zod";
 
 export class AppError extends Error {
   constructor(
@@ -13,6 +14,16 @@ export class AppError extends Error {
 }
 
 export function toErrorResponse(error: unknown) {
+  if (error instanceof ZodError) {
+    return {
+      status: 400,
+      body: {
+        success: false,
+        message: "Request validation failed",
+        errors: error.issues.map((issue) => ({ path: issue.path.map(String).join("."), message: issue.message })),
+      },
+    };
+  }
   if (error instanceof AppError) {
     return {
       body: {
@@ -24,7 +35,8 @@ export function toErrorResponse(error: unknown) {
     };
   }
 
-  console.error("Unhandled API error:", error);
+  // Unexpected exceptions may contain SQL, credentials or provider payloads.
+  console.error("Unhandled API error");
 
   return {
     body: {
