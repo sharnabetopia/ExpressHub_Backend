@@ -840,6 +840,23 @@ Implement logic:
 - skip/take for pagination
 - search with matching fields
 
+#### Implemented Step-11 behavior
+
+- Existing shipment/user lists already implement search, filtering, allow-listed sorting and offset pagination; Step 11 consolidates their shared query contract and verifies combined behavior.
+- Shared schemas now define pagination bounds/defaults, trimmed search text, sort direction and inclusive ISO date ranges across user, shipment, payment and audit validators where supported.
+- All list routes use the common duplicate-query rejection helper, including Admin aliases. Unknown parameters, invalid bounds and reversed dates return 400.
+- Search and filters intersect the authenticated ownership/role scope and soft-delete rules. Row/count reads use a repeatable-read snapshot; ascending IDs break sort ties.
+- Payment lists retain their existing status/shipment filters and fixed chronological ordering. Audit lists retain exact field filters; no unnecessary endpoints or unsupported search/sort options were added.
+- Complete endpoint/query matrix, examples, retention semantics and offset-pagination limitations: `docs/list-queries.md`.
+
+#### Step-11 acceptance checklist
+
+- [x] Search, filters, sorting and pagination available together on shipment and user lists.
+- [x] Shared strict query validation and consistent duplicate/unknown-parameter rejection.
+- [x] Verified combined filters, timezone boundaries, decimal price sorting, tied pagination and empty pages.
+- [x] Verified Customer/Courier ownership, Admin scope and soft-delete exclusion.
+- [x] Eight-route PostgreSQL integration suite, auth/payment regression tests, TypeScript check and production build pass.
+
 ---
 
 ### Step 12: Soft delete and audit logging

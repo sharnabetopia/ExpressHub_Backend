@@ -1,5 +1,6 @@
 import { PaymentStatus, ShipmentStatus } from "@prisma/client";
 import { z } from "zod";
+import { paginationFields, searchQuery, sortOrder, dateRangeFields, validDateRange, dateRangeError } from "@/validators/list-query";
 
 export const shipmentIdSchema = z.cuid();
 const dimension = z.number().positive().max(99999999.99).multipleOf(0.01);
@@ -36,17 +37,14 @@ export const shipmentStatusSchema = z.object({
   message: "Delivery confirmation or failure/return reason is required", path: ["note"],
 });
 
-const integer = (max: number) => z.string().regex(/^[1-9]\d*$/).transform(Number).pipe(z.number().int().max(max));
 export const listShipmentsSchema = z.object({
-  page: integer(1_000_000).default(1), limit: integer(100).default(20),
+  ...paginationFields,
   status: z.enum(ShipmentStatus).optional(), paymentStatus: z.enum(PaymentStatus).optional(),
-  q: z.string().trim().min(1).max(100).optional(),
-  from: z.iso.datetime({ offset: true }).optional(), to: z.iso.datetime({ offset: true }).optional(),
+  q: searchQuery,
+  ...dateRangeFields,
   sortBy: z.enum(["createdAt", "updatedAt", "price"]).default("createdAt"),
-  order: z.enum(["asc", "desc"]).default("desc"),
-}).strict().refine((v) => !v.from || !v.to || Date.parse(v.from) <= Date.parse(v.to), {
-  message: "from must be no later than to", path: ["from"],
-});
+  order: sortOrder,
+}).strict().refine(validDateRange, dateRangeError);
 
 export type CreateShipmentInput = z.infer<typeof createShipmentSchema>;
 export type AssignCourierInput = z.infer<typeof assignCourierSchema>;
