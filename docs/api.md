@@ -1,7 +1,7 @@
 # ExpressHub API documentation (Step 15)
 
 Import [the Postman v2.1 collection](postman/ExpressHub.postman_collection.json).
-It contains all 32 implemented method/path combinations, plus a separate
+It contains all 34 implemented method/path combinations, ten role access checks, and a separate
 cancellation example using the shipment status endpoint. Saved responses are
 illustrative examples, not records from a running database.
 
@@ -12,25 +12,28 @@ illustrative examples, not records from a running database.
    `JWT_ACCESS_SECRET` of at least 32 bytes, and `ALLOWED_ORIGIN`.
 2. Run `npm run prisma:migrate:deploy` and `npm run dev`. Production additionally
    requires HTTPS and Upstash configuration; see [security](security.md).
-3. Import the collection in Postman. Set its `baseUrl` (no trailing slash),
+3. Import the collection and matching environment in Postman. Select that environment and set `baseUrl` (no trailing slash),
    `email`, and `password` variables locally. Passwords for registration require
    at least 12 characters and at most 72 UTF-8 bytes. No credentials ship with
-   the collection. Avoid environment variables with the same names: they
-   override the collection values that scripts update.
+   the collection. Scripts store runtime values in the selected environment.
 4. Send Register or Login. Its post-response script saves `data.accessToken`
-   to the collection's `accessToken`. Protected requests inherit Bearer auth.
+   to the environment's `accessToken`. Protected requests inherit Bearer auth.
    Keep the cookie jar enabled: refresh and logout use `expresshub_refresh`,
    not the bearer token. Refresh saves the rotated access token automatically.
 5. Set `userId` and `courierId` to actual IDs from your database/API. Create
    shipment saves `shipmentId` automatically. IDs are CUIDs, not email addresses.
    Login as the appropriate account before sending a request for a different
-   role. Logout clears the collection token, but server-side access JWTs remain
+   role. Logout clears the active environment token, but server-side access JWTs remain
    valid until expiry unless the account is deactivated/deleted.
 
 Send requests individually in the order appropriate to the account and resource.
 This collection is a reference, not a whole-collection automated scenario:
 role changes, cancellation and deletion modify records and have prerequisites.
 Keep populated tokens/passwords private when exporting or sharing it.
+
+For account setup, token handling and the ten role checks, see
+[Role-wise API testing](postman-testing.md). Login preserves the target `userId`;
+set it explicitly before user administration.
 
 ## Payment-free walkthrough
 

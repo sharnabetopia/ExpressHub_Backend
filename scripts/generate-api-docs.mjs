@@ -123,6 +123,6 @@ for (const {method,path,op,options,example,status} of operations) {
 }
 mkdirSync("docs/postman",{recursive:true});
 writeFileSync("docs/openapi.json",JSON.stringify(spec,null,2)+"\n");
-writeFileSync("docs/postman/ExpressHub.postman_collection.json",JSON.stringify(collection,null,2)+"\n");
-writeFileSync("docs/postman/ExpressHub.local.postman_environment.json",JSON.stringify({name:"ExpressHub local (fill privately)",values:[{key:"baseUrl",value:"http://localhost:3000",enabled:true},{key:"email",value:"",enabled:true},{key:"password",value:"",enabled:true,type:"secret"}],_postman_variable_scope:"environment"},null,2)+"\n");
+writeFileSync("docs/postman/ExpressHub.non-payment.postman_collection.json",JSON.stringify(collection,null,2)+"\n");
+writeFileSync("docs/postman/ExpressHub.non-payment.postman_environment.json",JSON.stringify({name:"ExpressHub local (fill privately)",values:[{key:"baseUrl",value:"http://localhost:3000",enabled:true},{key:"email",value:"",enabled:true},{key:"password",value:"",enabled:true,type:"secret"}],_postman_variable_scope:"environment"},null,2)+"\n");
 console.info(`Generated OpenAPI and Postman documents for ${operations.length} non-payment operations.`);
