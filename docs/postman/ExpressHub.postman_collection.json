@@ -1,0 +1,3831 @@
+{
+  "info": {
+    "_postman_id": "87e4e892-4c2c-41f5-b03e-36abedb2d094",
+    "name": "ExpressHub_API",
+    "description": "<html><head></head><body><p>All implemented API routes. Import the matching environment and read docs/postman-testing.md. Send mutations individually. Run the Role access checks folder after logging in all three roles. Saved examples are illustrative.\nUpdated: login/refresh saves tokens to both collection and active environment. Checkout explicitly uses customerToken. Login as CUSTOMER before checkout.</p>\n</body></html>",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health /api/v1/health",
+          "id": "b9b17970-d9fc-4e00-a265-3d77dd874447",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/health",
+            "description": "<p>Public database readiness probe; 503 DATABASE_UNAVAILABLE when unavailable.</p>\n"
+          },
+          "response": [
+            {
+              "id": "4e463d85-2774-4604-959a-476ea9f893b9",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": "http://localhost:3000/api/v1/health",
+                "description": "Public database readiness probe; 503 DATABASE_UNAVAILABLE when unavailable."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"API is healthy\",\n  \"data\": {\n    \"status\": \"ok\",\n    \"database\": \"connected\",\n    \"timestamp\": \"2026-10-10T00:00:00.000Z\"\n  }\n}"
+            }
+          ],
+          "_postman_id": "b9b17970-d9fc-4e00-a265-3d77dd874447"
+        },
+        {
+          "name": "Health /api/health",
+          "id": "e83b4ca9-09d2-48f5-958b-d447b907b3da",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/health",
+            "description": "<p>Public database readiness probe; 503 DATABASE_UNAVAILABLE when unavailable.</p>\n"
+          },
+          "response": [
+            {
+              "id": "258a09f0-885e-440c-b87a-418218058233",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": "http://localhost:3000/api/health",
+                "description": "Public database readiness probe; 503 DATABASE_UNAVAILABLE when unavailable."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"API is healthy\",\n  \"data\": {\n    \"status\": \"ok\",\n    \"database\": \"connected\",\n    \"timestamp\": \"2026-10-10T00:00:00.000Z\"\n  }\n}"
+            }
+          ],
+          "_postman_id": "e83b4ca9-09d2-48f5-958b-d447b907b3da"
+        }
+      ],
+      "id": "13446275-d91e-4f74-abc3-e208bfa6c26d",
+      "_postman_id": "13446275-d91e-4f74-abc3-e208bfa6c26d",
+      "description": "",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Auth response is successful', function () { pm.expect(pm.response.code).to.be.within(200,299); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const json = pm.response.json();",
+                  "  const data = json.data || json;",
+                  "  const token = data.accessToken || data.access_token || data.token || json.accessToken;",
+                  "  if (!token) { console.warn('No access token in auth response'); }",
+                  "  else {",
+                  "    const save = (key,value) => {",
+                  "      pm.collectionVariables.set(key,String(value));",
+                  "      if (pm.environment.id) pm.environment.set(key,String(value));",
+                  "    };",
+                  "    save('accessToken',token);",
+                  "    const user = data.user;",
+                  "    const storeUser = (u) => {",
+                  "      if (!u) return;",
+                  "      if (u.id) save('currentUserId',u.id);",
+                  "      if (u.role) {",
+                  "        const role = String(u.role).toLowerCase();",
+                  "        save('currentRole',u.role);",
+                  "        save(role+'Token',token);",
+                  "        if (u.id) save(role+'Id',u.id);",
+                  "      }",
+                  "    };",
+                  "    if (user) storeUser(user);",
+                  "    else pm.sendRequest({url:pm.variables.get('baseUrl')+'/api/v1/users/me',method:'GET',header:{Authorization:'Bearer '+token}},(err,res)=>{",
+                  "      if (!err && res.code===200) storeUser((res.json().data||{}).user);",
+                  "    });",
+                  "    console.log('Auth saved. Role: '+(user?.role||'checking /users/me'));",
+                  "  }",
+                  "}"
+                ],
+                "id": "75f432cd-d085-41d0-98ee-cf2a05eeac49"
+              }
+            }
+          ],
+          "id": "ae43da95-3482-4225-82a8-4744cd1d973c",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Example Customer\",\n  \"email\": \"\",\n  \"password\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/auth/register",
+            "description": "<p>No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER.</p>\n"
+          },
+          "response": [
+            {
+              "id": "c7675dd7-143f-4459-a7ed-09e209c5d6fa",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Example Customer\",\n  \"email\": \"\",\n  \"password\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/auth/register",
+                "description": "No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER."
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Account created successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"CUSTOMER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    },\n    \"accessToken\": \"<signed-access-token>\"\n  }\n}"
+            }
+          ],
+          "_postman_id": "ae43da95-3482-4225-82a8-4744cd1d973c"
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Auth response is successful', function () { pm.expect(pm.response.code).to.be.within(200,299); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const json = pm.response.json();",
+                  "  const data = json.data || json;",
+                  "  const token = data.accessToken || data.access_token || data.token || json.accessToken;",
+                  "  if (!token) { console.warn('No access token in auth response'); }",
+                  "  else {",
+                  "    const save = (key,value) => {",
+                  "      pm.collectionVariables.set(key,String(value));",
+                  "      if (pm.environment.id) pm.environment.set(key,String(value));",
+                  "    };",
+                  "    save('accessToken',token);",
+                  "    const user = data.user;",
+                  "    const storeUser = (u) => {",
+                  "      if (!u) return;",
+                  "      if (u.id) save('currentUserId',u.id);",
+                  "      if (u.role) {",
+                  "        const role = String(u.role).toLowerCase();",
+                  "        save('currentRole',u.role);",
+                  "        save(role+'Token',token);",
+                  "        if (u.id) save(role+'Id',u.id);",
+                  "      }",
+                  "    };",
+                  "    if (user) storeUser(user);",
+                  "    else pm.sendRequest({url:pm.variables.get('baseUrl')+'/api/v1/users/me',method:'GET',header:{Authorization:'Bearer '+token}},(err,res)=>{",
+                  "      if (!err && res.code===200) storeUser((res.json().data||{}).user);",
+                  "    });",
+                  "    console.log('Auth saved. Role: '+(user?.role||'checking /users/me'));",
+                  "  }",
+                  "}"
+                ],
+                "id": "f57e359f-70e0-4bfc-aa4d-42eb7fca8a5f"
+              }
+            }
+          ],
+          "id": "4fbb3eef-92eb-4981-bac0-c7da69866c72",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"\",\n  \"password\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/auth/login",
+            "description": "<p>No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER.</p>\n"
+          },
+          "response": [
+            {
+              "id": "369cc914-8c4a-49bd-9a89-67580ba53be0",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"\",\n  \"password\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/auth/login",
+                "description": "No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"CUSTOMER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    },\n    \"accessToken\": \"<signed-access-token>\"\n  }\n}"
+            }
+          ],
+          "_postman_id": "4fbb3eef-92eb-4981-bac0-c7da69866c72"
+        },
+        {
+          "name": "Refresh token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Auth response is successful', function () { pm.expect(pm.response.code).to.be.within(200,299); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const json = pm.response.json();",
+                  "  const data = json.data || json;",
+                  "  const token = data.accessToken || data.access_token || data.token || json.accessToken;",
+                  "  if (!token) { console.warn('No access token in auth response'); }",
+                  "  else {",
+                  "    const save = (key,value) => {",
+                  "      pm.collectionVariables.set(key,String(value));",
+                  "      if (pm.environment.id) pm.environment.set(key,String(value));",
+                  "    };",
+                  "    save('accessToken',token);",
+                  "    const user = data.user;",
+                  "    const storeUser = (u) => {",
+                  "      if (!u) return;",
+                  "      if (u.id) save('currentUserId',u.id);",
+                  "      if (u.role) {",
+                  "        const role = String(u.role).toLowerCase();",
+                  "        save('currentRole',u.role);",
+                  "        save(role+'Token',token);",
+                  "        if (u.id) save(role+'Id',u.id);",
+                  "      }",
+                  "    };",
+                  "    if (user) storeUser(user);",
+                  "    else pm.sendRequest({url:pm.variables.get('baseUrl')+'/api/v1/users/me',method:'GET',header:{Authorization:'Bearer '+token}},(err,res)=>{",
+                  "      if (!err && res.code===200) storeUser((res.json().data||{}).user);",
+                  "    });",
+                  "    console.log('Auth saved. Role: '+(user?.role||'checking /users/me'));",
+                  "  }",
+                  "}"
+                ],
+                "id": "f32ec05b-cf2e-49ae-9fdd-3def9e99f54b"
+              }
+            }
+          ],
+          "id": "c071041e-c575-4ef6-ae51-19c33f7684fc",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/auth/refresh-token",
+            "description": "<p>No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER.</p>\n"
+          },
+          "response": [
+            {
+              "id": "dbce0aa1-25ae-4a5e-b3d6-c31fdaf96013",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "url": "http://localhost:3000/api/v1/auth/refresh-token",
+                "description": "No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Token refreshed successfully\",\n  \"data\": {\n    \"accessToken\": \"<signed-access-token>\"\n  }\n}"
+            }
+          ],
+          "_postman_id": "c071041e-c575-4ef6-ae51-19c33f7684fc"
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  for (const name of ['accessToken','currentUserId','currentRole']) {",
+                  "    pm.collectionVariables.unset(name);",
+                  "    if (pm.environment.id) pm.environment.unset(name);",
+                  "  }",
+                  "}"
+                ],
+                "id": "cc995204-3268-4b8a-b5ca-cad0478cb796"
+              }
+            }
+          ],
+          "id": "78620420-af26-42cb-ae93-57685ba8ae8b",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/auth/logout",
+            "description": "<p>No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER.</p>\n"
+          },
+          "response": [
+            {
+              "id": "d3605027-a771-4112-b9ca-9a1377ccd712",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "url": "http://localhost:3000/api/v1/auth/logout",
+                "description": "No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Logged out successfully\",\n  \"data\": null\n}"
+            }
+          ],
+          "_postman_id": "78620420-af26-42cb-ae93-57685ba8ae8b"
+        }
+      ],
+      "id": "01f88e5e-6cc8-4dab-9a32-71e2c72ad2b7",
+      "_postman_id": "01f88e5e-6cc8-4dab-9a32-71e2c72ad2b7",
+      "description": "",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "My profile",
+          "id": "302db61b-d58f-429c-9a30-601a2ff20d1f",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/users/me",
+            "description": "<p>Any active role.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "17673457-58f9-480e-ba08-6a723fdfd467",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "http://localhost:3000/api/v1/users/me",
+                "description": "Any active role."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Profile fetched successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"CUSTOMER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "id": "e99e0f78-debf-4431-a30f-86502c719521",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "http://localhost:3000/api/v1/users/me",
+                "description": "Any active role."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "302db61b-d58f-429c-9a30-601a2ff20d1f"
+        },
+        {
+          "name": "Update my profile",
+          "id": "1a0f3624-f70d-4d42-88b9-4694563a0195",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Customer\",\n  \"phone\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/users/me",
+            "description": "<p>Any active role. At least one of name, email, phone; phone may be null. Unknown fields rejected.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "f47e8ce8-5fce-4bb7-a9f9-46c62f3c8b5c",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Customer\",\n  \"phone\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/users/me",
+                "description": "Any active role. At least one of name, email, phone; phone may be null. Unknown fields rejected."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Profile updated successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Updated Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"CUSTOMER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "id": "a2375420-765d-462c-9ab2-de0474d5637c",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Customer\",\n  \"phone\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/users/me",
+                "description": "Any active role. At least one of name, email, phone; phone may be null. Unknown fields rejected."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "1a0f3624-f70d-4d42-88b9-4694563a0195"
+        },
+        {
+          "name": "User detail",
+          "id": "273cf3be-e58f-4424-98e9-b27dc51a6c09",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/users/",
+            "description": "<p>Owner or Admin. Other users receive 404.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "31cc9c77-58c6-423a-b370-ce946fd217b0",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "http://localhost:3000/api/v1/users/",
+                "description": "Owner or Admin. Other users receive 404."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"User fetched successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"CUSTOMER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "id": "741a9de4-6405-42f8-909f-6849b97c3b42",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "http://localhost:3000/api/v1/users/",
+                "description": "Owner or Admin. Other users receive 404."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "273cf3be-e58f-4424-98e9-b27dc51a6c09"
+        },
+        {
+          "name": "List users",
+          "id": "ab384eff-bafd-44b0-9664-2b280298115b",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/users?page=1&limit=20&sortBy=createdAt&order=desc",
+            "description": "<p>Admin only. Optional role, isActive, q; sortBy createdAt/name/email and order asc/desc. Unknown/duplicate queries rejected.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "74f7db0c-7493-42d3-883f-ccdfa8976296",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/users?page=1&limit=20&sortBy=createdAt&order=desc",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt"
+                    },
+                    {
+                      "key": "order",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Admin only. Optional role, isActive, q; sortBy createdAt/name/email and order asc/desc. Unknown/duplicate queries rejected."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Users fetched successfully\",\n  \"data\": {\n    \"users\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "id": "3f481b13-3b09-4bed-ad72-69f6f40805bc",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/users?page=1&limit=20&sortBy=createdAt&order=desc",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt"
+                    },
+                    {
+                      "key": "order",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Admin only. Optional role, isActive, q; sortBy createdAt/name/email and order asc/desc. Unknown/duplicate queries rejected."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "ab384eff-bafd-44b0-9664-2b280298115b"
+        },
+        {
+          "name": "Change user role",
+          "id": "f8d158dd-ff03-4a99-8bf1-515ede24fa47",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"COURIER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/users//role",
+            "description": "<p>Admin only. CUSTOMER/COURIER/ADMIN. Cannot change own access. Revokes target refresh sessions and audits changes.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "d3b9fe24-b6a4-464f-9d97-3c9c05486c48",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"COURIER\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/users//role",
+                "description": "Admin only. CUSTOMER/COURIER/ADMIN. Cannot change own access. Revokes target refresh sessions and audits changes."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"User role updated successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"COURIER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "id": "14717e1f-bc6f-4e28-9357-b15fcc8e5957",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"COURIER\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/users//role",
+                "description": "Admin only. CUSTOMER/COURIER/ADMIN. Cannot change own access. Revokes target refresh sessions and audits changes."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "f8d158dd-ff03-4a99-8bf1-515ede24fa47"
+        },
+        {
+          "name": "Change active status",
+          "id": "8c679132-77b5-4cba-92ee-f0c084af8747",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/users//status",
+            "description": "<p>Admin only; cannot change own access. Deactivation revokes refresh sessions.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "c24db5f0-f794-4721-ba87-5a05945f13fc",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"isActive\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/users//status",
+                "description": "Admin only; cannot change own access. Deactivation revokes refresh sessions."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"User status updated successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"CUSTOMER\",\n      \"isActive\": false,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "id": "71a26f11-9cdb-4b72-8559-4b38a918ffb0",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"isActive\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/users//status",
+                "description": "Admin only; cannot change own access. Deactivation revokes refresh sessions."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "8c679132-77b5-4cba-92ee-f0c084af8747"
+        },
+        {
+          "name": "Soft-delete user",
+          "id": "d84a0874-e086-4bfc-ae50-6c76c707e740",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Account closed after operations completed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/users/",
+            "description": "<p>Admin only; reason 3–1000 characters. Blocks self-deletion, active shipments and unresolved payments/refunds. Repeated deletion: 404.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "73be33f6-d742-4a0d-a58a-50f2b94ff005",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Account closed after operations completed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/users/",
+                "description": "Admin only; reason 3–1000 characters. Blocks self-deletion, active shipments and unresolved payments/refunds. Repeated deletion: 404."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"User deleted successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"deletedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "id": "f47cc29a-bfe9-4ee5-8e64-f4382ff9a566",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Account closed after operations completed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/users/",
+                "description": "Admin only; reason 3–1000 characters. Blocks self-deletion, active shipments and unresolved payments/refunds. Repeated deletion: 404."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "d84a0874-e086-4bfc-ae50-6c76c707e740"
+        }
+      ],
+      "id": "fd1d3186-4209-4e4c-b7fd-c55b2452b5cd",
+      "_postman_id": "fd1d3186-4209-4e4c-b7fd-c55b2452b5cd",
+      "description": "",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "List users",
+          "id": "0e57caeb-6faa-4774-9fdb-7a6ba3e3496c",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/admin/users?page=1&limit=20&sortBy=createdAt&order=desc",
+            "description": "<p>Admin only. Optional role, isActive, q; sortBy createdAt/name/email and order asc/desc. Unknown/duplicate queries rejected.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "919b250e-a642-4856-89c3-d5d02cf71aaa",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/admin/users?page=1&limit=20&sortBy=createdAt&order=desc",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt"
+                    },
+                    {
+                      "key": "order",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Admin only. Optional role, isActive, q; sortBy createdAt/name/email and order asc/desc. Unknown/duplicate queries rejected."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Users fetched successfully\",\n  \"data\": {\n    \"users\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "id": "91e4ff46-a2e2-4ef0-9489-bda33430addd",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/admin/users?page=1&limit=20&sortBy=createdAt&order=desc",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt"
+                    },
+                    {
+                      "key": "order",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Admin only. Optional role, isActive, q; sortBy createdAt/name/email and order asc/desc. Unknown/duplicate queries rejected."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "0e57caeb-6faa-4774-9fdb-7a6ba3e3496c"
+        },
+        {
+          "name": "Change user role",
+          "id": "8b980c7e-193b-4431-b01b-276c5e5b94a0",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"COURIER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/admin/users//role",
+            "description": "<p>Admin only. CUSTOMER/COURIER/ADMIN. Cannot change own access. Revokes target refresh sessions and audits changes.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "c72c0871-a0f4-4704-8e31-9ea5403d1136",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"COURIER\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/admin/users//role",
+                "description": "Admin only. CUSTOMER/COURIER/ADMIN. Cannot change own access. Revokes target refresh sessions and audits changes."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"User role updated successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"COURIER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "id": "cafd48b0-562b-4b7b-a767-b3549ea838c9",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"COURIER\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/admin/users//role",
+                "description": "Admin only. CUSTOMER/COURIER/ADMIN. Cannot change own access. Revokes target refresh sessions and audits changes."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "8b980c7e-193b-4431-b01b-276c5e5b94a0"
+        },
+        {
+          "name": "Monitor shipments",
+          "id": "e88ffcdd-f278-4a6f-90eb-54f3ddbceb7c",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/admin/shipments?page=1&limit=20",
+            "description": "<p>Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "4934e46b-1873-4c43-9785-5c53a9faabfc",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/admin/shipments?page=1&limit=20",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "shipments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Shipments fetched successfully\",\n  \"data\": {\n    \"shipments\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "id": "bebf3b5f-514b-4c20-a879-61afe034370d",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/admin/shipments?page=1&limit=20",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "shipments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "e88ffcdd-f278-4a6f-90eb-54f3ddbceb7c"
+        },
+        {
+          "name": "Dashboard statistics",
+          "id": "35f3cf2f-9f3d-4b38-a664-590ae51c4a28",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/admin/dashboard-stats",
+            "description": "<p>Admin only, no query parameters. data.users: total/active/inactive/byRole; data.shipments: total/active/byStatus; data.payments: total/byStatus/amounts. Currency-separated decimal amounts are not net revenue. Operational counts exclude deleted records; payment history remains included.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "e4a8854e-e85b-4107-b17d-daa93ac04019",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "http://localhost:3000/api/v1/admin/dashboard-stats",
+                "description": "Admin only, no query parameters. data.users: total/active/inactive/byRole; data.shipments: total/active/byStatus; data.payments: total/byStatus/amounts. Currency-separated decimal amounts are not net revenue. Operational counts exclude deleted records; payment history remains included."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "35f3cf2f-9f3d-4b38-a664-590ae51c4a28"
+        },
+        {
+          "name": "Audit logs",
+          "id": "99aba169-2a51-4607-abe8-319a327307e0",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/admin/audit-logs?page=1&limit=20&sortBy=createdAt&order=desc",
+            "description": "<p>Admin only. Optional actorId/entityType/entityId/shipmentId/paymentId/action/from/to. Exact action match. sortBy createdAt/action, order asc/desc. Retains deleted-target history; no mutation endpoint.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "13849a17-2293-4965-9baa-233f719e0d6a",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/admin/audit-logs?page=1&limit=20&sortBy=createdAt&order=desc",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "audit-logs"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt"
+                    },
+                    {
+                      "key": "order",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Admin only. Optional actorId/entityType/entityId/shipmentId/paymentId/action/from/to. Exact action match. sortBy createdAt/action, order asc/desc. Retains deleted-target history; no mutation endpoint."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Audit logs fetched successfully\",\n  \"data\": {\n    \"auditLogs\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "id": "e1779376-07c7-4b83-976d-6175da7543f3",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/admin/audit-logs?page=1&limit=20&sortBy=createdAt&order=desc",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "audit-logs"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt"
+                    },
+                    {
+                      "key": "order",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Admin only. Optional actorId/entityType/entityId/shipmentId/paymentId/action/from/to. Exact action match. sortBy createdAt/action, order asc/desc. Retains deleted-target history; no mutation endpoint."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "99aba169-2a51-4607-abe8-319a327307e0"
+        }
+      ],
+      "id": "e7a2ddac-6d01-4b1f-b736-c14e034b5565",
+      "_postman_id": "e7a2ddac-6d01-4b1f-b736-c14e034b5565",
+      "description": "",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "Shipments",
+      "item": [
+        {
+          "name": "Create shipment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const id = pm.response.json().data?.shipment?.id;",
+                  "  if (id) {",
+                  "    for (const scope of [pm.collectionVariables,...(pm.environment.id?[pm.environment]:[])]) {",
+                  "      scope.set('shipmentId',id);",
+                  "      scope.unset('idempotencyKey');",
+                  "      scope.unset('paymentAttemptShipmentId');",
+                  "    }",
+                  "  }",
+                  "}"
+                ],
+                "id": "9a5b0348-5b5e-4084-be9b-7ca20ec73676"
+              }
+            }
+          ],
+          "id": "a0c9a356-fa10-4ce0-98a2-541a9fd73bab",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pickupContactName\": \"Example Sender\",\n  \"pickupContactPhone\": \"+8801700000000\",\n  \"pickupAddress\": \"123 Example Road, Dhaka\",\n  \"deliveryContactName\": \"Example Recipient\",\n  \"deliveryContactPhone\": \"+8801800000000\",\n  \"deliveryAddress\": \"456 Example Road, Chattogram\",\n  \"parcelWeightKg\": 1.5,\n  \"packageDescription\": \"Books\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/shipments",
+            "description": "<p>Customer only. Requires one matching active pricing rule. Price/currency are calculated server-side. Optional dimensions must include all three; pickupScheduledAt must be a future ISO timestamp with timezone. Returns 201 data.shipment; decimal values are strings.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "792933f9-c1e5-4d66-92ba-86f7d1ed953d",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pickupContactName\": \"Example Sender\",\n  \"pickupContactPhone\": \"+8801700000000\",\n  \"pickupAddress\": \"123 Example Road, Dhaka\",\n  \"deliveryContactName\": \"Example Recipient\",\n  \"deliveryContactPhone\": \"+8801800000000\",\n  \"deliveryAddress\": \"456 Example Road, Chattogram\",\n  \"parcelWeightKg\": 1.5,\n  \"packageDescription\": \"Books\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/shipments",
+                "description": "Customer only. Requires one matching active pricing rule. Price/currency are calculated server-side. Optional dimensions must include all three; pickupScheduledAt must be a future ISO timestamp with timezone. Returns 201 data.shipment; decimal values are strings."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "a0c9a356-fa10-4ce0-98a2-541a9fd73bab"
+        },
+        {
+          "name": "List shipments",
+          "id": "103be9f8-bf86-4ece-b497-2878f3e6ab7b",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/shipments?page=1&limit=20",
+            "description": "<p>Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "a1f478d6-c761-474f-87e1-80fceb19fea9",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/shipments?page=1&limit=20",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Shipments fetched successfully\",\n  \"data\": {\n    \"shipments\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "id": "3d1fe1c2-5e21-41e6-8327-b79de750fb33",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/shipments?page=1&limit=20",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "103be9f8-bf86-4ece-b497-2878f3e6ab7b"
+        },
+        {
+          "name": "My shipments",
+          "id": "55e3e949-454b-471d-9db9-d2f8b6086c2d",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/shipments/my-shipments?page=1&limit=20",
+            "description": "<p>Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "d9b5b9bc-3997-4eee-9ab5-8b889c2e7da0",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/shipments/my-shipments?page=1&limit=20",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "my-shipments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Shipments fetched successfully\",\n  \"data\": {\n    \"shipments\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "id": "2e10cdf0-9264-469c-bbfb-e7d892316698",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/shipments/my-shipments?page=1&limit=20",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "my-shipments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "55e3e949-454b-471d-9db9-d2f8b6086c2d"
+        },
+        {
+          "name": "Search shipments",
+          "id": "fa17dce8-cc81-44d8-a9f0-cd4381694b01",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/shipments/search?page=1&limit=20&q=Dhaka",
+            "description": "<p>Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "0611b00c-c148-463c-9021-cb03dcb38cf3",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/shipments/search?page=1&limit=20&q=Dhaka",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "q",
+                      "value": "Dhaka"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Shipments fetched successfully\",\n  \"data\": {\n    \"shipments\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "id": "3cac601a-c915-4458-b082-0678a3a5d051",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/shipments/search?page=1&limit=20&q=Dhaka",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "q",
+                      "value": "Dhaka"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "fa17dce8-cc81-44d8-a9f0-cd4381694b01"
+        },
+        {
+          "name": "Shipment detail",
+          "id": "eb525711-fc2c-4ef1-aaf0-1e70ebb211c7",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/shipments/",
+            "description": "<p>Owner, assigned Courier or Admin. Returns data.shipment with timeline; internal notes are excluded. Out-of-scope/deleted records: 404.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "0fc59619-d7e8-4f91-bf10-469971a5cf64",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "http://localhost:3000/api/v1/shipments/",
+                "description": "Owner, assigned Courier or Admin. Returns data.shipment with timeline; internal notes are excluded. Out-of-scope/deleted records: 404."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "eb525711-fc2c-4ef1-aaf0-1e70ebb211c7"
+        },
+        {
+          "name": "Assign courier",
+          "id": "bc75dbc8-cd55-477f-9cea-227f75f11da5",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courierId\": \"\",\n  \"expectedCourierId\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/shipments//assign-courier",
+            "description": "<p>Admin only; CREATED/FAILED shipment and active COURIER. Initial expectedCourierId is null; for reassignment supply current courier ID. Stale expectation: 409. Assignment can precede payment.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "6b2ee34a-3655-4d26-82f6-0129bb30efac",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"courierId\": \"\",\n  \"expectedCourierId\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/shipments//assign-courier",
+                "description": "Admin only; CREATED/FAILED shipment and active COURIER. Initial expectedCourierId is null; for reassignment supply current courier ID. Stale expectation: 409. Assignment can precede payment."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "bc75dbc8-cd55-477f-9cea-227f75f11da5"
+        },
+        {
+          "name": "Update shipment status",
+          "id": "94b4c32d-b53c-4470-ac2f-3f50ebe5a607",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedStatus\": \"CREATED\",\n  \"status\": \"PICKED_UP\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/shipments//status",
+            "description": "<p>Assigned Courier or Admin for operational transitions; Customer can cancel own CREATED shipment. CREATED→PICKED_UP→IN_TRANSIT→OUT_FOR_DELIVERY→DELIVERED/FAILED; Admin FAILED→IN_TRANSIT/RETURNED. Expected status required. Pickup/dispatch/delivery require verified PAID and active courier; DELIVERED/FAILED/RETURNED require note. Returns data.shipment; conflicts 409.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "3b1b033f-ff80-4654-a2c4-82725f7ac632",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"expectedStatus\": \"CREATED\",\n  \"status\": \"PICKED_UP\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/shipments//status",
+                "description": "Assigned Courier or Admin for operational transitions; Customer can cancel own CREATED shipment. CREATED→PICKED_UP→IN_TRANSIT→OUT_FOR_DELIVERY→DELIVERED/FAILED; Admin FAILED→IN_TRANSIT/RETURNED. Expected status required. Pickup/dispatch/delivery require verified PAID and active courier; DELIVERED/FAILED/RETURNED require note. Returns data.shipment; conflicts 409."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "94b4c32d-b53c-4470-ac2f-3f50ebe5a607"
+        },
+        {
+          "name": "Cancel uncollected shipment",
+          "id": "4a704a79-edff-45f9-bfad-f6a0599fb253",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedStatus\": \"CREATED\",\n  \"status\": \"CANCELLED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/shipments//status",
+            "description": "<p>Owner Customer or Admin. Pending payment attempts block cancellation. Does not refund a payment. Use this example for the payment-free walkthrough.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "f1ad7e1f-cac6-4dfc-bfe6-46148689befb",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"expectedStatus\": \"CREATED\",\n  \"status\": \"CANCELLED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/shipments//status",
+                "description": "Owner Customer or Admin. Pending payment attempts block cancellation. Does not refund a payment. Use this example for the payment-free walkthrough."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "4a704a79-edff-45f9-bfad-f6a0599fb253"
+        },
+        {
+          "name": "Soft-delete shipment",
+          "id": "61056140-9d80-429b-a119-3d6cf9231e24",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Completed shipment archived\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/shipments/",
+            "description": "<p>Admin only. Requires terminal DELIVERED/RETURNED/CANCELLED and no unresolved payments/refunds. Preserves history.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "f8253a4f-21a1-46dd-9283-d8b54b9ff07c",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Completed shipment archived\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/shipments/",
+                "description": "Admin only. Requires terminal DELIVERED/RETURNED/CANCELLED and no unresolved payments/refunds. Preserves history."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Shipment deleted successfully\",\n  \"data\": {\n    \"shipment\": {\n      \"id\": \"cmexampleship0000000000000\",\n      \"deletedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "id": "6b505c20-0695-49c4-97eb-2bfb2145faba",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Completed shipment archived\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/shipments/",
+                "description": "Admin only. Requires terminal DELIVERED/RETURNED/CANCELLED and no unresolved payments/refunds. Preserves history."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "61056140-9d80-429b-a119-3d6cf9231e24"
+        }
+      ],
+      "id": "685007e1-6323-4a4d-8484-f88040c1c70f",
+      "_postman_id": "685007e1-6323-4a4d-8484-f88040c1c70f",
+      "description": "",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "Payments — deferred reference",
+      "item": [
+        {
+          "name": "Initiate Checkout",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.variables.get('customerToken');",
+                  "if (!token) throw new Error('CUSTOMER login first: customerToken missing. Send Authentication > Login using a CUSTOMER account.');",
+                  "const shipment = pm.variables.get('shipmentId');",
+                  "if (!shipment) throw new Error('Create a shipment first: shipmentId missing');",
+                  "const previous = pm.variables.get('paymentAttemptShipmentId');",
+                  "if (!pm.variables.get('idempotencyKey') || previous !== shipment) {",
+                  "  const key = pm.variables.replaceIn('ffea4c77-b3f7-4c95-9f87-e2161b060987');",
+                  "  pm.collectionVariables.set('idempotencyKey',key);",
+                  "  pm.collectionVariables.set('paymentAttemptShipmentId',shipment);",
+                  "  if (pm.environment.id) {",
+                  "    pm.environment.set('idempotencyKey',key);",
+                  "    pm.environment.set('paymentAttemptShipmentId',shipment);",
+                  "  }",
+                  "}"
+                ],
+                "id": "9c7a27c4-ef98-4491-90bd-ad95c840cc0d"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Checkout does not fail auth',() => pm.expect(pm.response.code).not.to.equal(401));",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const data = pm.response.json().data || {};",
+                  "  const save = (key,value) => {",
+                  "    pm.collectionVariables.set(key,String(value));",
+                  "    if (pm.environment.id) pm.environment.set(key,String(value));",
+                  "  };",
+                  "  if (data.payment?.id) save('paymentId',data.payment.id);",
+                  "  if (data.checkoutUrl) save('checkoutUrl',data.checkoutUrl);",
+                  "  console.log('Checkout URL saved. Open it in a browser to complete Stripe test payment.');",
+                  "}"
+                ],
+                "id": "f2278626-27b1-4f6b-ab9b-2f9529010150"
+              }
+            }
+          ],
+          "id": "967f31f3-5715-447a-bba7-6047577700a1",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shipmentId\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/payments/initiate",
+            "description": "<p>Deferred. Customer owning CREATED shipment. Set idempotencyKey to a UUID once per attempt; reuse for retries. Returns data.payment and checkoutUrl. Requires configured Stripe. Do not run during payment-free walkthrough.</p>\n"
+          },
+          "response": [
+            {
+              "id": "58dabfad-75a7-4207-96b5-fd310ae8a403",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Idempotency-Key",
+                    "value": ""
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"shipmentId\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "http://localhost:3000/api/v1/payments/initiate",
+                "description": "Deferred. Customer owning CREATED shipment. Set idempotencyKey to a UUID once per attempt; reuse for retries. Returns data.payment and checkoutUrl. Requires configured Stripe. Do not run during payment-free walkthrough."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "967f31f3-5715-447a-bba7-6047577700a1"
+        },
+        {
+          "name": "Payment detail",
+          "id": "e0675c08-192b-4fc6-8f82-45cb6b876014",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/payments/",
+            "description": "<p>Paying Customer or Admin; Courier 403. Returns data.payment; retained after shipment deletion.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "b253aaa3-99b6-452d-8185-78651cfcd8a8",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "http://localhost:3000/api/v1/payments/",
+                "description": "Paying Customer or Admin; Courier 403. Returns data.payment; retained after shipment deletion."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "e0675c08-192b-4fc6-8f82-45cb6b876014"
+        },
+        {
+          "name": "My payments",
+          "id": "1b62d810-7002-4b6c-b999-5e365cdb61e8",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/payments/my-payments?page=1&limit=20",
+            "description": "<p>Customer/Admin own payments. Optional status and shipmentId; fixed chronological order.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "185da5a4-c183-4ae0-b403-fa3e86987ecd",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/payments/my-payments?page=1&limit=20",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "my-payments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer/Admin own payments. Optional status and shipmentId; fixed chronological order."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Payments fetched successfully\",\n  \"data\": {\n    \"payments\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "id": "45398b9f-09c9-44bd-a4fb-edb7da250d4b",
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/v1/payments/my-payments?page=1&limit=20",
+                  "host": [
+                    "http://localhost:3000"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "my-payments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer/Admin own payments. Optional status and shipmentId; fixed chronological order."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "_postman_id": "1b62d810-7002-4b6c-b999-5e365cdb61e8"
+        },
+        {
+          "name": "Stripe webhook (provider only)",
+          "id": "d5698db1-c3d5-4619-b187-abfc2b7e0ba4",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Stripe-Signature",
+                "value": "<provider-generated signature>"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/payments/webhook",
+            "description": "<p>Reference only. Stripe sends original raw JSON with Stripe-Signature. This unsigned sample is rejected. Use provider delivery instructions in docs/payments.md; Postman cannot confirm payments by submitting a status.</p>\n"
+          },
+          "response": [],
+          "_postman_id": "d5698db1-c3d5-4619-b187-abfc2b7e0ba4"
+        },
+        {
+          "name": "Checkout return: success",
+          "id": "7dd5dfc0-2090-401f-a720-f57b80dfa30d",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/payments/return/success",
+            "description": "<p>Public informational return only. Never settles payment or changes shipment status.</p>\n"
+          },
+          "response": [
+            {
+              "id": "09bdc7e8-98a8-4950-8243-482c8db93893",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": "http://localhost:3000/api/v1/payments/return/success",
+                "description": "Public informational return only. Never settles payment or changes shipment status."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Checkout returned. Check your authenticated payment status for confirmation.\",\n  \"data\": {\n    \"checkout\": \"returned\",\n    \"paymentConfirmed\": false\n  }\n}"
+            }
+          ],
+          "_postman_id": "7dd5dfc0-2090-401f-a720-f57b80dfa30d"
+        },
+        {
+          "name": "Checkout return: cancel",
+          "id": "e895a724-f17c-4e5c-9591-d2439d53fdcf",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/payments/return/cancel",
+            "description": "<p>Public informational return only. Never settles payment or changes shipment status.</p>\n"
+          },
+          "response": [
+            {
+              "id": "d6aa8349-0478-4c1a-9262-8714dedefce8",
+              "name": "Illustrative success",
+              "originalRequest": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": "http://localhost:3000/api/v1/payments/return/cancel",
+                "description": "Public informational return only. Never settles payment or changes shipment status."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Checkout was left without confirmation. The payment session may still be open.\",\n  \"data\": {\n    \"checkout\": \"cancelled\",\n    \"paymentConfirmed\": false\n  }\n}"
+            }
+          ],
+          "_postman_id": "e895a724-f17c-4e5c-9591-d2439d53fdcf"
+        },
+        {
+          "name": "Create Checkout",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.variables.get('customerToken');",
+                  "if (!token) throw new Error('CUSTOMER login first: customerToken missing. Send Authentication > Login using a CUSTOMER account.');",
+                  "const shipment = pm.variables.get('shipmentId');",
+                  "if (!shipment) throw new Error('Create a shipment first: shipmentId missing');",
+                  "const previous = pm.variables.get('paymentAttemptShipmentId');",
+                  "if (!pm.variables.get('idempotencyKey') || previous !== shipment) {",
+                  "  const key = pm.variables.replaceIn('8ecf3237-adb5-4dcf-9b01-47b6e8aac5c4');",
+                  "  pm.collectionVariables.set('idempotencyKey',key);",
+                  "  pm.collectionVariables.set('paymentAttemptShipmentId',shipment);",
+                  "  if (pm.environment.id) {",
+                  "    pm.environment.set('idempotencyKey',key);",
+                  "    pm.environment.set('paymentAttemptShipmentId',shipment);",
+                  "  }",
+                  "}"
+                ],
+                "id": "6c599dac-7f90-4320-b96b-4bff9a2cf1ef"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Checkout does not fail auth',() => pm.expect(pm.response.code).not.to.equal(401));",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const data = pm.response.json().data || {};",
+                  "  const save = (key,value) => {",
+                  "    pm.collectionVariables.set(key,String(value));",
+                  "    if (pm.environment.id) pm.environment.set(key,String(value));",
+                  "  };",
+                  "  if (data.payment?.id) save('paymentId',data.payment.id);",
+                  "  if (data.checkoutUrl) save('checkoutUrl',data.checkoutUrl);",
+                  "  console.log('Checkout URL saved. Open it in a browser to complete Stripe test payment.');",
+                  "}"
+                ],
+                "id": "87cf04ec-d321-4b15-b58d-0e8e4e845e5d"
+              }
+            }
+          ],
+          "id": "faa98718-2dad-41dc-b50f-758d1aaf991c",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shipmentId\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "http://localhost:3000/api/v1/payments/create",
+            "description": "<p>Deferred. Customer owning CREATED shipment. Set idempotencyKey to a UUID once per attempt; reuse for retries. Returns data.payment and checkoutUrl. Requires configured Stripe. Do not run during payment-free walkthrough.</p>\n"
+          },
+          "response": [],
+          "_postman_id": "faa98718-2dad-41dc-b50f-758d1aaf991c"
+        },
+        {
+          "name": "Payment history alias",
+          "id": "3ec0aa45-19bc-4210-89ec-ed4e7f5059e4",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/payments?page=1&limit=20",
+            "description": "<p>Customer/Admin own payments. Optional status and shipmentId; fixed chronological order.</p>\n",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": [],
+          "_postman_id": "3ec0aa45-19bc-4210-89ec-ed4e7f5059e4"
+        }
+      ],
+      "id": "0087ff04-68f0-4498-8e23-5e6d5c7a8e83",
+      "_postman_id": "0087ff04-68f0-4498-8e23-5e6d5c7a8e83",
+      "description": "",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "Role access checks",
+      "item": [
+        {
+          "name": "CUSTOMER profile",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "if (!state.get('customerToken')) throw new Error('Login to populate customerToken first');"
+                ],
+                "id": "c2931adf-2133-499d-afe8-e44988980b83"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "pm.test('Expected HTTP 200', () => pm.expect(pm.response.code).to.equal(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Response envelope', () => pm.expect(body.success).to.equal(true));",
+                  "pm.test('Current database role', () => pm.expect(body.data.user.role).to.equal('CUSTOMER'));"
+                ],
+                "id": "c935e8b6-b794-493a-b9df-1584c65e5c7f"
+              }
+            }
+          ],
+          "id": "7b609fac-05df-4d50-89c5-01c5a4eda122",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/users/me"
+          },
+          "response": [],
+          "_postman_id": "7b609fac-05df-4d50-89c5-01c5a4eda122"
+        },
+        {
+          "name": "CUSTOMER dashboard access",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "if (!state.get('customerToken')) throw new Error('Login to populate customerToken first');"
+                ],
+                "id": "8268d7a0-1e05-420b-9f49-8e18471f151e"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "pm.test('Expected HTTP 403', () => pm.expect(pm.response.code).to.equal(403));",
+                  "const body = pm.response.json();",
+                  "pm.test('Response envelope', () => pm.expect(body.success).to.equal(false));"
+                ],
+                "id": "544b015d-1ca7-472d-8557-655d3ae9b86b"
+              }
+            }
+          ],
+          "id": "37bc1368-3bb9-4ba3-9bf6-9413b2f60c21",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/admin/dashboard-stats"
+          },
+          "response": [],
+          "_postman_id": "37bc1368-3bb9-4ba3-9bf6-9413b2f60c21"
+        },
+        {
+          "name": "CUSTOMER scoped shipments",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "if (!state.get('customerToken')) throw new Error('Login to populate customerToken first');"
+                ],
+                "id": "c2a8c208-cf52-48e8-94a3-37d08815e1a8"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "pm.test('Expected HTTP 200', () => pm.expect(pm.response.code).to.equal(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Response envelope', () => pm.expect(body.success).to.equal(true));",
+                  "pm.test('Every shipment belongs to this account', () => { for (const shipment of body.data.shipments) pm.expect(shipment.customerId).to.equal(state.get('customerId')); });"
+                ],
+                "id": "7c2be14b-a816-4f22-bbf3-fa24b94b603c"
+              }
+            }
+          ],
+          "id": "c4c82df7-d81e-4dc1-b2f7-e680bf75fc10",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/shipments"
+          },
+          "response": [],
+          "_postman_id": "c4c82df7-d81e-4dc1-b2f7-e680bf75fc10"
+        },
+        {
+          "name": "COURIER profile",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "if (!state.get('courierToken')) throw new Error('Login to populate courierToken first');"
+                ],
+                "id": "ee84c4c3-984f-4ec0-876d-292cd2b0d66f"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "pm.test('Expected HTTP 200', () => pm.expect(pm.response.code).to.equal(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Response envelope', () => pm.expect(body.success).to.equal(true));",
+                  "pm.test('Current database role', () => pm.expect(body.data.user.role).to.equal('COURIER'));"
+                ],
+                "id": "19c74817-7d12-4773-b046-a64faa601c12"
+              }
+            }
+          ],
+          "id": "c20746c1-a8da-4536-9c84-94be712b436c",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/users/me"
+          },
+          "response": [],
+          "_postman_id": "c20746c1-a8da-4536-9c84-94be712b436c"
+        },
+        {
+          "name": "COURIER dashboard access",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "if (!state.get('courierToken')) throw new Error('Login to populate courierToken first');"
+                ],
+                "id": "77662396-88df-4e86-b2d9-4848195894d1"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "pm.test('Expected HTTP 403', () => pm.expect(pm.response.code).to.equal(403));",
+                  "const body = pm.response.json();",
+                  "pm.test('Response envelope', () => pm.expect(body.success).to.equal(false));"
+                ],
+                "id": "2641b3eb-4dc0-43bb-9e1f-1116cca2cab2"
+              }
+            }
+          ],
+          "id": "a747d1f7-b248-4ad2-8fd4-908b38a17288",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/admin/dashboard-stats"
+          },
+          "response": [],
+          "_postman_id": "a747d1f7-b248-4ad2-8fd4-908b38a17288"
+        },
+        {
+          "name": "COURIER scoped shipments",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "if (!state.get('courierToken')) throw new Error('Login to populate courierToken first');"
+                ],
+                "id": "441b1e83-8237-4f3b-9f2c-8f6f89139a0e"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "pm.test('Expected HTTP 200', () => pm.expect(pm.response.code).to.equal(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Response envelope', () => pm.expect(body.success).to.equal(true));",
+                  "pm.test('Every shipment belongs to this account', () => { for (const shipment of body.data.shipments) pm.expect(shipment.courierId).to.equal(state.get('courierId')); });"
+                ],
+                "id": "a2f2fc01-8dc7-4a8e-b6cb-930401f28b65"
+              }
+            }
+          ],
+          "id": "fcc81dca-73e1-4272-bcd4-26139268a2e8",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/shipments"
+          },
+          "response": [],
+          "_postman_id": "fcc81dca-73e1-4272-bcd4-26139268a2e8"
+        },
+        {
+          "name": "ADMIN profile",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "if (!state.get('adminToken')) throw new Error('Login to populate adminToken first');"
+                ],
+                "id": "861f5499-587d-47e9-95a1-876efa65b67d"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "pm.test('Expected HTTP 200', () => pm.expect(pm.response.code).to.equal(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Response envelope', () => pm.expect(body.success).to.equal(true));",
+                  "pm.test('Current database role', () => pm.expect(body.data.user.role).to.equal('ADMIN'));"
+                ],
+                "id": "28f4aea4-87d1-4df3-9642-d80c59c6804a"
+              }
+            }
+          ],
+          "id": "b52ced0c-3181-4d2f-97aa-5ead1c63928d",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/users/me"
+          },
+          "response": [],
+          "_postman_id": "b52ced0c-3181-4d2f-97aa-5ead1c63928d"
+        },
+        {
+          "name": "ADMIN dashboard access",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "if (!state.get('adminToken')) throw new Error('Login to populate adminToken first');"
+                ],
+                "id": "25a8fd76-df04-4699-a48f-a51b76ad5793"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "pm.test('Expected HTTP 200', () => pm.expect(pm.response.code).to.equal(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Response envelope', () => pm.expect(body.success).to.equal(true));"
+                ],
+                "id": "e7177734-f744-4893-8a46-0f8863bff3bc"
+              }
+            }
+          ],
+          "id": "dfd06aa9-9b2d-4eea-80d6-07e911af3847",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/admin/dashboard-stats"
+          },
+          "response": [],
+          "_postman_id": "dfd06aa9-9b2d-4eea-80d6-07e911af3847"
+        },
+        {
+          "name": "Missing token rejected",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  ""
+                ],
+                "id": "1026dbef-d543-431a-8b88-5a284f081f1f"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "pm.test('Expected HTTP 401', () => pm.expect(pm.response.code).to.equal(401));",
+                  "const body = pm.response.json();",
+                  "pm.test('Response envelope', () => pm.expect(body.success).to.equal(false));"
+                ],
+                "id": "232900ec-50de-4edd-ac47-e2a6ef45dec0"
+              }
+            }
+          ],
+          "id": "05e81e18-edd5-42b0-894d-663a75775ed2",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/users/me"
+          },
+          "response": [],
+          "_postman_id": "05e81e18-edd5-42b0-894d-663a75775ed2"
+        },
+        {
+          "name": "Customer cannot read another customer shipment",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "if (!state.get('customerToken')) throw new Error('Login to populate customerToken first');",
+                  "if (!state.get('foreignShipmentId')) throw new Error('Set foreignShipmentId to another customer shipment');"
+                ],
+                "id": "5c7174e6-d032-4abd-8832-f8b3309eddd3"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.id ? pm.environment : pm.collectionVariables;",
+                  "pm.test('Expected HTTP 404', () => pm.expect(pm.response.code).to.equal(404));",
+                  "const body = pm.response.json();",
+                  "pm.test('Response envelope', () => pm.expect(body.success).to.equal(false));"
+                ],
+                "id": "b109f5e6-e946-4c00-bc65-ff06e8b872eb"
+              }
+            }
+          ],
+          "id": "12dcf3a7-e85a-40d8-9591-c23f9b9e4582",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "http://localhost:3000/api/v1/shipments/"
+          },
+          "response": [],
+          "_postman_id": "12dcf3a7-e85a-40d8-9591-c23f9b9e4582"
+        }
+      ],
+      "id": "6b0a63cb-27c9-4ad8-880f-f02502c77609",
+      "description": "<p>Read-only checks. Login CUSTOMER, COURIER and ADMIN first. Set foreignShipmentId to an undeleted shipment owned by another customer. Tokens must be unexpired.</p>\n",
+      "_postman_id": "6b0a63cb-27c9-4ad8-880f-f02502c77609",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": ""
+          }
+        ]
+      }
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": ""
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "email",
+      "value": ""
+    },
+    {
+      "key": "password",
+      "value": ""
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "currentUserId",
+      "value": ""
+    },
+    {
+      "key": "currentRole",
+      "value": ""
+    },
+    {
+      "key": "customerToken",
+      "value": ""
+    },
+    {
+      "key": "customerId",
+      "value": ""
+    },
+    {
+      "key": "courierToken",
+      "value": ""
+    },
+    {
+      "key": "courierId",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "adminId",
+      "value": ""
+    },
+    {
+      "key": "shipmentId",
+      "value": ""
+    },
+    {
+      "key": "foreignShipmentId",
+      "value": ""
+    },
+    {
+      "key": "paymentId",
+      "value": ""
+    },
+    {
+      "key": "checkoutUrl",
+      "value": ""
+    },
+    {
+      "key": "idempotencyKey",
+      "value": ""
+    },
+    {
+      "key": "paymentAttemptShipmentId",
+      "value": ""
+    }
+  ]
+}
