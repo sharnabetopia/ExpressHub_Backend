@@ -974,6 +974,21 @@ Create API docs using:
 
 Document all endpoints and auth token usage.
 
+#### Implemented Step-15 behavior
+
+- Importable Postman v2.1 collection: `docs/postman/ExpressHub.postman_collection.json`, covering every implemented method/path, including aliases, health and payment return endpoints.
+- Request bodies, list queries, access rules and representative response examples accompany the existing detailed module documentation.
+- Register/login/refresh scripts save the access token; protected requests inherit Bearer auth. Shipment creation saves its ID. Credentials ship empty, and refresh uses the cookie jar.
+- `docs/api.md` provides setup, variable usage, response/error contracts, a documentation index and a payment-free booking/assignment/cancellation/audit walkthrough.
+- Payment provider acceptance remains deferred at the user's request. Documentation does not bypass the verified-payment gate for pickup/delivery.
+
+#### Step-15 acceptance checklist
+
+- [x] Postman collection covers all implemented endpoints and documents authentication.
+- [x] Request and representative response examples, role restrictions and query documentation.
+- [x] Collection JSON, route coverage and example validation checked locally.
+- [ ] Interactive import/run in Postman and real-provider payment acceptance remain external verification tasks.
+
 ---
 
 ### Step 16: Testing and verification

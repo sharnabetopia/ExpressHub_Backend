@@ -115,9 +115,9 @@ Every successful transition writes actor, time, old/new status and audit history
 in the same transaction. Serializable retries and expected-state checks prevent
 duplicate transitions and competing assignment overwrites.
 
-No endpoint can mark a shipment paid. Until verified payment processing is
-implemented in step 9, newly booked shipments cannot progress to pickup. Returns
-and cancellations do not initiate refunds in this step.
+No client-facing endpoint can manually mark a shipment paid. Newly booked shipments
+cannot progress to pickup until the existing payment webhook verifies settlement.
+Returns and cancellations do not automatically initiate refunds.
 
 ## Lists and search
 

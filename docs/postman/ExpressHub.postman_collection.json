@@ -1,0 +1,3236 @@
+{
+  "info": {
+    "name": "ExpressHub API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "All implemented ExpressHub endpoints. See docs/api.md for setup and a payment-free walkthrough. Examples are illustrative, not captured production data. Send requests individually: role changes, cancellation and deletion modify data. Payments are deferred; the payment folder is reference only."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "customer@example.com",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "courierId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shipmentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "idempotencyKey",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health /api/v1/health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health"
+              ]
+            },
+            "description": "Public database readiness probe; 503 DATABASE_UNAVAILABLE when unavailable.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "health"
+                  ]
+                },
+                "description": "Public database readiness probe; 503 DATABASE_UNAVAILABLE when unavailable.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"API is healthy\",\n  \"data\": {\n    \"status\": \"ok\",\n    \"database\": \"connected\",\n    \"timestamp\": \"2026-10-10T00:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Health /api/health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": "Public database readiness probe; 503 DATABASE_UNAVAILABLE when unavailable.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "health"
+                  ]
+                },
+                "description": "Public database readiness probe; 503 DATABASE_UNAVAILABLE when unavailable.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"API is healthy\",\n  \"data\": {\n    \"status\": \"ok\",\n    \"database\": \"connected\",\n    \"timestamp\": \"2026-10-10T00:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Example Customer\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "register"
+                  ]
+                },
+                "description": "No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Example Customer\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Account created successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"CUSTOMER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    },\n    \"accessToken\": \"<signed-access-token>\"\n  }\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.data?.accessToken) pm.collectionVariables.set(\"accessToken\", body.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "description": "No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"CUSTOMER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    },\n    \"accessToken\": \"<signed-access-token>\"\n  }\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.data?.accessToken) pm.collectionVariables.set(\"accessToken\", body.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh-token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh-token"
+              ]
+            },
+            "description": "No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/refresh-token",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "refresh-token"
+                  ]
+                },
+                "description": "No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Token refreshed successfully\",\n  \"data\": {\n    \"accessToken\": \"<signed-access-token>\"\n  }\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.data?.accessToken) pm.collectionVariables.set(\"accessToken\", body.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "logout"
+                  ]
+                },
+                "description": "No bearer required. Login/register set a refresh cookie; enable the cookie jar. Refresh rotates that cookie. Logout revokes it; existing access tokens expire separately. Register requires a 12-character minimum password (maximum 72 UTF-8 bytes) and always creates CUSTOMER.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Logged out successfully\",\n  \"data\": null\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set(\"accessToken\", \"\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "My profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Any active role."
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me"
+                  ]
+                },
+                "description": "Any active role."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Profile fetched successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"CUSTOMER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me"
+                  ]
+                },
+                "description": "Any active role."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update my profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Any active role. At least one of name, email, phone; phone may be null. Unknown fields rejected.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Customer\",\n  \"phone\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me"
+                  ]
+                },
+                "description": "Any active role. At least one of name, email, phone; phone may be null. Unknown fields rejected.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Customer\",\n  \"phone\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Profile updated successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Updated Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"CUSTOMER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me"
+                  ]
+                },
+                "description": "Any active role. At least one of name, email, phone; phone may be null. Unknown fields rejected.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Customer\",\n  \"phone\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "User detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Owner or Admin. Other users receive 404."
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{userId}}"
+                  ]
+                },
+                "description": "Owner or Admin. Other users receive 404."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"User fetched successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"CUSTOMER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{userId}}"
+                  ]
+                },
+                "description": "Owner or Admin. Other users receive 404."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "List users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users?page=1&limit=20&sortBy=createdAt&order=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "order",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Admin only. Optional role, isActive, q; sortBy createdAt/name/email and order asc/desc. Unknown/duplicate queries rejected."
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users?page=1&limit=20&sortBy=createdAt&order=desc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt"
+                    },
+                    {
+                      "key": "order",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Admin only. Optional role, isActive, q; sortBy createdAt/name/email and order asc/desc. Unknown/duplicate queries rejected."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Users fetched successfully\",\n  \"data\": {\n    \"users\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users?page=1&limit=20&sortBy=createdAt&order=desc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt"
+                    },
+                    {
+                      "key": "order",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Admin only. Optional role, isActive, q; sortBy createdAt/name/email and order asc/desc. Unknown/duplicate queries rejected."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change user role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/role",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}",
+                "role"
+              ]
+            },
+            "description": "Admin only. CUSTOMER/COURIER/ADMIN. Cannot change own access. Revokes target refresh sessions and audits changes.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"COURIER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/{{userId}}/role",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{userId}}",
+                    "role"
+                  ]
+                },
+                "description": "Admin only. CUSTOMER/COURIER/ADMIN. Cannot change own access. Revokes target refresh sessions and audits changes.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"COURIER\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"User role updated successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"COURIER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/{{userId}}/role",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{userId}}",
+                    "role"
+                  ]
+                },
+                "description": "Admin only. CUSTOMER/COURIER/ADMIN. Cannot change own access. Revokes target refresh sessions and audits changes.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"COURIER\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change active status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}",
+                "status"
+              ]
+            },
+            "description": "Admin only; cannot change own access. Deactivation revokes refresh sessions.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/{{userId}}/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{userId}}",
+                    "status"
+                  ]
+                },
+                "description": "Admin only; cannot change own access. Deactivation revokes refresh sessions.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"isActive\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"User status updated successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"CUSTOMER\",\n      \"isActive\": false,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/{{userId}}/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{userId}}",
+                    "status"
+                  ]
+                },
+                "description": "Admin only; cannot change own access. Deactivation revokes refresh sessions.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"isActive\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Soft-delete user",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Admin only; reason 3\u20131000 characters. Blocks self-deletion, active shipments and unresolved payments/refunds. Repeated deletion: 404.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Account closed after operations completed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{userId}}"
+                  ]
+                },
+                "description": "Admin only; reason 3\u20131000 characters. Blocks self-deletion, active shipments and unresolved payments/refunds. Repeated deletion: 404.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Account closed after operations completed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"User deleted successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"deletedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "{{userId}}"
+                  ]
+                },
+                "description": "Admin only; reason 3\u20131000 characters. Blocks self-deletion, active shipments and unresolved payments/refunds. Repeated deletion: 404.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Account closed after operations completed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "List users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users?page=1&limit=20&sortBy=createdAt&order=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "order",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Admin only. Optional role, isActive, q; sortBy createdAt/name/email and order asc/desc. Unknown/duplicate queries rejected."
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/users?page=1&limit=20&sortBy=createdAt&order=desc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt"
+                    },
+                    {
+                      "key": "order",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Admin only. Optional role, isActive, q; sortBy createdAt/name/email and order asc/desc. Unknown/duplicate queries rejected."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Users fetched successfully\",\n  \"data\": {\n    \"users\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/users?page=1&limit=20&sortBy=createdAt&order=desc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt"
+                    },
+                    {
+                      "key": "order",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Admin only. Optional role, isActive, q; sortBy createdAt/name/email and order asc/desc. Unknown/duplicate queries rejected."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change user role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users/{{userId}}/role",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "{{userId}}",
+                "role"
+              ]
+            },
+            "description": "Admin only. CUSTOMER/COURIER/ADMIN. Cannot change own access. Revokes target refresh sessions and audits changes.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"COURIER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/users/{{userId}}/role",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "users",
+                    "{{userId}}",
+                    "role"
+                  ]
+                },
+                "description": "Admin only. CUSTOMER/COURIER/ADMIN. Cannot change own access. Revokes target refresh sessions and audits changes.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"COURIER\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"User role updated successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"cmexampleuser0000000000000\",\n      \"name\": \"Example Customer\",\n      \"email\": \"customer@example.com\",\n      \"phone\": null,\n      \"role\": \"COURIER\",\n      \"isActive\": true,\n      \"createdAt\": \"2026-10-10T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/users/{{userId}}/role",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "users",
+                    "{{userId}}",
+                    "role"
+                  ]
+                },
+                "description": "Admin only. CUSTOMER/COURIER/ADMIN. Cannot change own access. Revokes target refresh sessions and audits changes.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"COURIER\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Monitor shipments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/shipments?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "shipments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/shipments?page=1&limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "shipments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Shipments fetched successfully\",\n  \"data\": {\n    \"shipments\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/shipments?page=1&limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "shipments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Dashboard statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard-stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard-stats"
+              ]
+            },
+            "description": "Admin only, no query parameters. data.users: total/active/inactive/byRole; data.shipments: total/active/byStatus; data.payments: total/byStatus/amounts. Currency-separated decimal amounts are not net revenue. Operational counts exclude deleted records; payment history remains included."
+          },
+          "response": [
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/dashboard-stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "dashboard-stats"
+                  ]
+                },
+                "description": "Admin only, no query parameters. data.users: total/active/inactive/byRole; data.shipments: total/active/byStatus; data.payments: total/byStatus/amounts. Currency-separated decimal amounts are not net revenue. Operational counts exclude deleted records; payment history remains included."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Audit logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/audit-logs?page=1&limit=20&sortBy=createdAt&order=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "order",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Admin only. Optional actorId/entityType/entityId/shipmentId/paymentId/action/from/to. Exact action match. sortBy createdAt/action, order asc/desc. Retains deleted-target history; no mutation endpoint."
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/audit-logs?page=1&limit=20&sortBy=createdAt&order=desc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "audit-logs"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt"
+                    },
+                    {
+                      "key": "order",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Admin only. Optional actorId/entityType/entityId/shipmentId/paymentId/action/from/to. Exact action match. sortBy createdAt/action, order asc/desc. Retains deleted-target history; no mutation endpoint."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Audit logs fetched successfully\",\n  \"data\": {\n    \"auditLogs\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/audit-logs?page=1&limit=20&sortBy=createdAt&order=desc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "audit-logs"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "createdAt"
+                    },
+                    {
+                      "key": "order",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Admin only. Optional actorId/entityType/entityId/shipmentId/paymentId/action/from/to. Exact action match. sortBy createdAt/action, order asc/desc. Retains deleted-target history; no mutation endpoint."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Shipments",
+      "item": [
+        {
+          "name": "Create shipment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shipments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipments"
+              ]
+            },
+            "description": "Customer only. Requires one matching active pricing rule. Price/currency are calculated server-side. Optional dimensions must include all three; pickupScheduledAt must be a future ISO timestamp with timezone. Returns 201 data.shipment; decimal values are strings.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pickupContactName\": \"Example Sender\",\n  \"pickupContactPhone\": \"+8801700000000\",\n  \"pickupAddress\": \"123 Example Road, Dhaka\",\n  \"deliveryContactName\": \"Example Recipient\",\n  \"deliveryContactPhone\": \"+8801800000000\",\n  \"deliveryAddress\": \"456 Example Road, Chattogram\",\n  \"parcelWeightKg\": 1.5,\n  \"packageDescription\": \"Books\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments"
+                  ]
+                },
+                "description": "Customer only. Requires one matching active pricing rule. Price/currency are calculated server-side. Optional dimensions must include all three; pickupScheduledAt must be a future ISO timestamp with timezone. Returns 201 data.shipment; decimal values are strings.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pickupContactName\": \"Example Sender\",\n  \"pickupContactPhone\": \"+8801700000000\",\n  \"pickupAddress\": \"123 Example Road, Dhaka\",\n  \"deliveryContactName\": \"Example Recipient\",\n  \"deliveryContactPhone\": \"+8801800000000\",\n  \"deliveryAddress\": \"456 Example Road, Chattogram\",\n  \"parcelWeightKg\": 1.5,\n  \"packageDescription\": \"Books\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.data?.shipment?.id) pm.collectionVariables.set(\"shipmentId\", body.data.shipment.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List shipments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shipments?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments?page=1&limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Shipments fetched successfully\",\n  \"data\": {\n    \"shipments\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments?page=1&limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "My shipments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shipments/my-shipments?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipments",
+                "my-shipments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments/my-shipments?page=1&limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "my-shipments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Shipments fetched successfully\",\n  \"data\": {\n    \"shipments\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments/my-shipments?page=1&limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "my-shipments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Search shipments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shipments/search?page=1&limit=20&q=Dhaka",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipments",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "q",
+                  "value": "Dhaka"
+                }
+              ]
+            },
+            "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments/search?page=1&limit=20&q=Dhaka",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "q",
+                      "value": "Dhaka"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Shipments fetched successfully\",\n  \"data\": {\n    \"shipments\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments/search?page=1&limit=20&q=Dhaka",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "q",
+                      "value": "Dhaka"
+                    }
+                  ]
+                },
+                "description": "Customer: own; Courier: assigned; Admin: all (my-shipments: own historical bookings). Admin-prefixed route requires Admin. Optional status, paymentStatus, q, from/to ISO timestamps; sortBy createdAt/updatedAt/price, order asc/desc. Search requires q."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Shipment detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipments",
+                "{{shipmentId}}"
+              ]
+            },
+            "description": "Owner, assigned Courier or Admin. Returns data.shipment with timeline; internal notes are excluded. Out-of-scope/deleted records: 404."
+          },
+          "response": [
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "{{shipmentId}}"
+                  ]
+                },
+                "description": "Owner, assigned Courier or Admin. Returns data.shipment with timeline; internal notes are excluded. Out-of-scope/deleted records: 404."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Assign courier",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}/assign-courier",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipments",
+                "{{shipmentId}}",
+                "assign-courier"
+              ]
+            },
+            "description": "Admin only; CREATED/FAILED shipment and active COURIER. Initial expectedCourierId is null; for reassignment supply current courier ID. Stale expectation: 409. Assignment can precede payment.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courierId\": \"{{courierId}}\",\n  \"expectedCourierId\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}/assign-courier",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "{{shipmentId}}",
+                    "assign-courier"
+                  ]
+                },
+                "description": "Admin only; CREATED/FAILED shipment and active COURIER. Initial expectedCourierId is null; for reassignment supply current courier ID. Stale expectation: 409. Assignment can precede payment.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"courierId\": \"{{courierId}}\",\n  \"expectedCourierId\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update shipment status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipments",
+                "{{shipmentId}}",
+                "status"
+              ]
+            },
+            "description": "Assigned Courier or Admin for operational transitions; Customer can cancel own CREATED shipment. CREATED\u2192PICKED_UP\u2192IN_TRANSIT\u2192OUT_FOR_DELIVERY\u2192DELIVERED/FAILED; Admin FAILED\u2192IN_TRANSIT/RETURNED. Expected status required. Pickup/dispatch/delivery require verified PAID and active courier; DELIVERED/FAILED/RETURNED require note. Returns data.shipment; conflicts 409.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedStatus\": \"CREATED\",\n  \"status\": \"PICKED_UP\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "{{shipmentId}}",
+                    "status"
+                  ]
+                },
+                "description": "Assigned Courier or Admin for operational transitions; Customer can cancel own CREATED shipment. CREATED\u2192PICKED_UP\u2192IN_TRANSIT\u2192OUT_FOR_DELIVERY\u2192DELIVERED/FAILED; Admin FAILED\u2192IN_TRANSIT/RETURNED. Expected status required. Pickup/dispatch/delivery require verified PAID and active courier; DELIVERED/FAILED/RETURNED require note. Returns data.shipment; conflicts 409.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"expectedStatus\": \"CREATED\",\n  \"status\": \"PICKED_UP\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel uncollected shipment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipments",
+                "{{shipmentId}}",
+                "status"
+              ]
+            },
+            "description": "Owner Customer or Admin. Pending payment attempts block cancellation. Does not refund a payment. Use this example for the payment-free walkthrough.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedStatus\": \"CREATED\",\n  \"status\": \"CANCELLED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "{{shipmentId}}",
+                    "status"
+                  ]
+                },
+                "description": "Owner Customer or Admin. Pending payment attempts block cancellation. Does not refund a payment. Use this example for the payment-free walkthrough.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"expectedStatus\": \"CREATED\",\n  \"status\": \"CANCELLED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Soft-delete shipment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipments",
+                "{{shipmentId}}"
+              ]
+            },
+            "description": "Admin only. Requires terminal DELIVERED/RETURNED/CANCELLED and no unresolved payments/refunds. Preserves history.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Completed shipment archived\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "{{shipmentId}}"
+                  ]
+                },
+                "description": "Admin only. Requires terminal DELIVERED/RETURNED/CANCELLED and no unresolved payments/refunds. Preserves history.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Completed shipment archived\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Shipment deleted successfully\",\n  \"data\": {\n    \"shipment\": {\n      \"id\": \"cmexampleship0000000000000\",\n      \"deletedAt\": \"2026-10-10T00:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "shipments",
+                    "{{shipmentId}}"
+                  ]
+                },
+                "description": "Admin only. Requires terminal DELIVERED/RETURNED/CANCELLED and no unresolved payments/refunds. Preserves history.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Completed shipment archived\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Payments \u2014 deferred reference",
+      "item": [
+        {
+          "name": "Initiate Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotencyKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/initiate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "initiate"
+              ]
+            },
+            "description": "Deferred. Customer owning CREATED shipment. Set idempotencyKey to a UUID once per attempt; reuse for retries. Returns data.payment and checkoutUrl. Requires configured Stripe. Do not run during payment-free walkthrough.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shipmentId\": \"{{shipmentId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Idempotency-Key",
+                    "value": "{{idempotencyKey}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/payments/initiate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "initiate"
+                  ]
+                },
+                "description": "Deferred. Customer owning CREATED shipment. Set idempotencyKey to a UUID once per attempt; reuse for retries. Returns data.payment and checkoutUrl. Requires configured Stripe. Do not run during payment-free walkthrough.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"shipmentId\": \"{{shipmentId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Payment detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/{{paymentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "{{paymentId}}"
+              ]
+            },
+            "description": "Paying Customer or Admin; Courier 403. Returns data.payment; retained after shipment deletion."
+          },
+          "response": [
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/payments/{{paymentId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "{{paymentId}}"
+                  ]
+                },
+                "description": "Paying Customer or Admin; Courier 403. Returns data.payment; retained after shipment deletion."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "My payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/my-payments?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "my-payments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Customer/Admin own payments. Optional status and shipmentId; fixed chronological order."
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/payments/my-payments?page=1&limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "my-payments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer/Admin own payments. Optional status and shipmentId; fixed chronological order."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Payments fetched successfully\",\n  \"data\": {\n    \"payments\": [],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 0,\n      \"totalPages\": 0\n    }\n  }\n}"
+            },
+            {
+              "name": "Missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/payments/my-payments?page=1&limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "my-payments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Customer/Admin own payments. Optional status and shipmentId; fixed chronological order."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\",\n  \"errors\": [\n    {\n      \"code\": \"UNAUTHENTICATED\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Stripe webhook (provider only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Stripe-Signature",
+                "value": "<provider-generated signature>"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/webhook",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "webhook"
+              ]
+            },
+            "description": "Reference only. Stripe sends original raw JSON with Stripe-Signature. This unsigned sample is rejected. Use provider delivery instructions in docs/payments.md; Postman cannot confirm payments by submitting a status.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Checkout return: success",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/return/success",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "return",
+                "success"
+              ]
+            },
+            "description": "Public informational return only. Never settles payment or changes shipment status.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/payments/return/success",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "return",
+                    "success"
+                  ]
+                },
+                "description": "Public informational return only. Never settles payment or changes shipment status.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Checkout returned. Check your authenticated payment status for confirmation.\",\n  \"data\": {\n    \"checkout\": \"returned\",\n    \"paymentConfirmed\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Checkout return: cancel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/return/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "return",
+                "cancel"
+              ]
+            },
+            "description": "Public informational return only. Never settles payment or changes shipment status.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Illustrative success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/payments/return/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "payments",
+                    "return",
+                    "cancel"
+                  ]
+                },
+                "description": "Public informational return only. Never settles payment or changes shipment status.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Checkout was left without confirmation. The payment session may still be open.\",\n  \"data\": {\n    \"checkout\": \"cancelled\",\n    \"paymentConfirmed\": false\n  }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
