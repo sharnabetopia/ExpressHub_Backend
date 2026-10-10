@@ -18,6 +18,23 @@ scope; these are not public tracking endpoints.
 
 ## Pricing setup
 
+For this project's approved flat delivery fee, run:
+
+```bash
+npm run prisma:seed:pricing
+```
+
+This creates one active rule charging **100 BDT per shipment**, with no additional
+weight fee, for the full accepted weight range (0.001–9999999.999 kg). It uses
+the configured `DATABASE_URL`, writes an audit entry atomically, and needs no
+Admin bootstrap credentials. Repeating it leaves the matching rule unchanged.
+It refuses to overwrite overlapping active or scheduled custom rules. Existing
+shipments retain their original price. Run this setup for each database used by
+the API; the Admin seed alone does not configure pricing.
+
+`PRICING_UNAVAILABLE` means booking cannot find exactly one currently effective
+active rule for the supplied weight. An empty pricing table also causes this error.
+
 Before booking, configure `PricingRule` records in the development database using
 your database administration tooling (for example, `npx prisma studio`). The API
 requires exactly one active rule covering the parcel weight at booking time.
