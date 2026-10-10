@@ -28,13 +28,13 @@ Protected routes require `Authorization: Bearer <access-token>` and return `Cach
 
 | Method | Path | Access / input |
 |---|---|---|
-| POST | `/api/v1/payments/initiate` | Customer owning an undeleted CREATED shipment; JSON `{ "shipmentId": "<id>" }`; UUID `Idempotency-Key` header required |
+| POST | `/api/v1/payments/create` (or `/initiate`) | Customer owning an undeleted CREATED shipment; JSON `{ "shipmentId": "<id>" }`; UUID `Idempotency-Key` header required |
 | GET | `/api/v1/payments/:id` | Paying customer or Admin; another customer gets 404, Courier gets 403 |
-| GET | `/api/v1/payments/my-payments` | Customer/Admin's own payments; `page`, `limit` (max 100), optional `status` and `shipmentId` |
+| GET | `/api/v1/payments` (or `/my-payments`) | Customer/Admin's own payments; `page`, `limit` (max 100), optional `status` and `shipmentId` |
 | POST | `/api/v1/payments/webhook` | No bearer token; requires a valid Stripe signature on the original request body |
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/payments/initiate \
+curl -X POST http://localhost:3000/api/v1/payments/create \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H 'Content-Type: application/json' \
   -H "Idempotency-Key: $PAYMENT_REQUEST_UUID" \
@@ -118,3 +118,14 @@ Set these variables in both your private local environment and hosting environme
 Updating `.env` on your computer does not update a hosted deployment. Redeploy after updating hosting variables and code. `npm run stripe:check` performs read-only test-key and webhook-subscription checks without printing secrets; it does not claim to verify webhook signatures or settlement.
 
 For the final hosted acceptance test, create a booking and initiate Checkout through the protected deployed API, pay using a [Stripe test card](https://docs.stripe.com/testing), and inspect payment status and Stripe delivery results. Do not send a locally forged webhook or manually edit PAID as a substitute for provider delivery.
+
+## RentNest-style API structure
+
+ExpressHub now supports the same payment route shapes as the previous rental backend:
+
+- `POST /api/v1/payments/create`: start hosted Stripe Checkout for a shipment (replaces `rentalRequestId` with `shipmentId`); the original `/initiate` endpoint remains available.
+- `GET /api/v1/payments`: customer-owned payment history with pagination (alias of `/my-payments`).
+- `GET /api/v1/payments/:id`: authorized payment details (unchanged).
+- `POST /api/v1/payments/webhook`: **the only settlement authority** (unchanged). No manual payment-confirmation route is created.
+
+Payment handlers are consolidated in `services/payment.controller.ts` and delegate business rules to `services/payment.service.ts`. The existing idempotency key, Stripe signature checking, server-side PaymentIntent verification, refund processing, audit logging, role checks, and transaction isolation remain unchanged. The checkout response retains `data.payment` and `data.checkoutUrl`; use the payment object's `id` to fetch status.
