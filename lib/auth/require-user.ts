@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import { assertAccessTokenConfiguration, verifyAccessToken } from "@/lib/auth/tokens";
 import { AppError, RateLimitError } from "@/lib/http/errors";
 import { limitApiRequests } from "@/lib/rate-limit";
+import { rateLimitDiagnostics } from "@/lib/rate-limit-diagnostics";
 
 export type AuthenticatedUser = {
   id: string;
@@ -34,7 +35,8 @@ export async function requireUser(request: Request): Promise<AuthenticatedUser> 
   let limit;
   try {
     limit = await limitApiRequests(claims.userId, "authenticated-api", 300);
-  } catch {
+  } catch (error) {
+    console.error("Authenticated API rate limit check failed", rateLimitDiagnostics(error));
     throw new AppError(503, "Request protection is temporarily unavailable", "RATE_LIMIT_UNAVAILABLE");
   }
   if (!limit.success) throw new RateLimitError(limit.reset);

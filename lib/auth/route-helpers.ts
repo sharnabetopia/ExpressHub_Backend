@@ -7,6 +7,7 @@ import { isAllowedCookieRequest, refreshTokenCookie } from "@/lib/auth/tokens";
 import { AppError } from "@/lib/http/errors";
 import { errorResponse, tooManyRequestsResponse } from "@/lib/http/responses";
 import { getRateLimitIdentifier, limitApiRequests } from "@/lib/rate-limit";
+import { rateLimitDiagnostics } from "@/lib/rate-limit-diagnostics";
 
 export async function parseRequestBody<T>(request: Request, schema: ZodType<T>): Promise<T> {
   const contentType = request.headers.get("content-type")?.split(";")[0].trim().toLowerCase();
@@ -64,8 +65,8 @@ export async function checkAuthRateLimit(
       limit,
       15 * 60 * 1000,
     );
-  } catch {
-    console.error("Authentication rate limit check failed");
+  } catch (error) {
+    console.error("Authentication rate limit check failed", rateLimitDiagnostics(error));
     throw new AppError(503, "Authentication service is temporarily unavailable", "RATE_LIMIT_UNAVAILABLE");
   }
 
