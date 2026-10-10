@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { toErrorResponse } from "@/lib/http/errors";
+import { RateLimitError, toErrorResponse } from "@/lib/http/errors";
 
 export function successResponse<T>(message: string, data: T, status = 200) {
   return NextResponse.json(
@@ -12,6 +12,7 @@ export function successResponse<T>(message: string, data: T, status = 200) {
 }
 
 export function errorResponse(error: unknown) {
+  if (error instanceof RateLimitError) return tooManyRequestsResponse(error.reset);
   const result = toErrorResponse(error);
   return NextResponse.json(result.body, {
     status: result.status,

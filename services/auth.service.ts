@@ -15,7 +15,8 @@ import { AppError } from "@/lib/http/errors";
 import type { LoginInput, RegisterInput } from "@/validators/auth";
 
 const PASSWORD_HASH_ROUNDS = 12;
-const DUMMY_PASSWORD_HASH = "$2b$12$qt4m.EVm.fwF9Xr7vWqkyeHMROY.v11wqNxXSugpGmibdPsV28ol6";
+const DUMMY_PASSWORD_HASH =
+  "$2b$12$qt4m.EVm.fwF9Xr7vWqkyeHMROY.v11wqNxXSugpGmibdPsV28ol6";
 
 const safeUserSelect = {
   id: true,
@@ -70,8 +71,15 @@ export async function registerCustomer(input: RegisterInput) {
       refreshToken,
     };
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      throw new AppError(409, "An account with this email already exists", "EMAIL_ALREADY_EXISTS");
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      throw new AppError(
+        409,
+        "An account with this email already exists",
+        "EMAIL_ALREADY_EXISTS",
+      );
     }
 
     throw error;
@@ -158,7 +166,11 @@ export async function rotateRefreshToken(currentToken: string) {
       !storedToken.user.isActive ||
       storedToken.user.deletedAt
     ) {
-      throw new AppError(401, "Invalid or expired refresh token", "INVALID_REFRESH_TOKEN");
+      throw new AppError(
+        401,
+        "Invalid or expired refresh token",
+        "INVALID_REFRESH_TOKEN",
+      );
     }
 
     const revoked = await tx.refreshToken.updateMany({
@@ -174,7 +186,11 @@ export async function rotateRefreshToken(currentToken: string) {
     });
 
     if (revoked.count !== 1) {
-      throw new AppError(401, "Invalid or expired refresh token", "INVALID_REFRESH_TOKEN");
+      throw new AppError(
+        401,
+        "Invalid or expired refresh token",
+        "INVALID_REFRESH_TOKEN",
+      );
     }
 
     await tx.refreshToken.create({

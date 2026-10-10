@@ -4,7 +4,8 @@ import { UserRole } from "@prisma/client";
 
 import prisma from "@/lib/prisma";
 import { assertAccessTokenConfiguration, verifyAccessToken } from "@/lib/auth/tokens";
-import { AppError } from "@/lib/http/errors";
+import { AppError, RateLimitError } from "@/lib/http/errors";
+import { limitApiRequests } from "@/lib/rate-limit";
 
 export type AuthenticatedUser = {
   id: string;
@@ -29,6 +30,14 @@ export async function requireUser(request: Request): Promise<AuthenticatedUser> 
   } catch {
     throw new AppError(401, "Invalid or expired access token", "INVALID_TOKEN");
   }
+
+  let limit;
+  try {
+    limit = await limitApiRequests(claims.userId, "authenticated-api", 300);
+  } catch {
+    throw new AppError(503, "Request protection is temporarily unavailable", "RATE_LIMIT_UNAVAILABLE");
+  }
+  if (!limit.success) throw new RateLimitError(limit.reset);
 
   const user = await prisma.user.findFirst({
     where: {

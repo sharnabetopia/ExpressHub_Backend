@@ -7,6 +7,7 @@ const port = process.env.ERROR_TEST_PORT ?? "3196";
 const base = `http://localhost:${port}`;
 const child = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "--port", port], {
   env: { ...process.env, NODE_ENV: "production", ALLOWED_ORIGIN: base,
+    UPSTASH_REDIS_REST_URL: "", UPSTASH_REDIS_REST_TOKEN: "",
     DATABASE_URL: "postgresql://test:test@127.0.0.1:1/test?connect_timeout=1", JWT_ACCESS_SECRET: "test-only-secret-at-least-thirty-two-characters" },
   stdio: ["ignore", "pipe", "pipe"],
 });
@@ -19,6 +20,12 @@ async function check(path, status, code, method = "GET", headers = {}) {
   assert.equal(response.status, status, path);
   assert.match(response.headers.get("content-type"), /application\/json/);
   assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
+  assert.match(response.headers.get("content-security-policy"), /default-src 'none'/);
+  assert.equal(response.headers.get("cross-origin-resource-policy"), "same-origin");
+  assert.ok(response.headers.get("strict-transport-security"));
+  assert.equal(response.headers.get("x-powered-by"), null);
   const body = await response.json();
   assert.equal(body.success, false);
   assert.equal(body.errors[0].code, code);
@@ -44,6 +51,9 @@ try {
   }
   for (const path of ["/api/health", "/api/v1/health"]) await check(path, 503, "DATABASE_UNAVAILABLE");
   await check("/api/v1/users", 403, "ORIGIN_NOT_ALLOWED", "OPTIONS", { origin: "https://foreign.example" });
+  await check("/api/v1/users", 403, "ORIGIN_NOT_ALLOWED", "POST", { origin: "https://foreign.example" });
+  await check("/api/v1/users", 403, "CORS_NOT_ALLOWED", "OPTIONS", { origin: base, "access-control-request-method": "TRACE" });
+  await check("/api/v1/auth/login", 503, "RATE_LIMIT_UNAVAILABLE", "POST");
   const cors = await check("/api/v1/not-a-route", 404, "ENDPOINT_NOT_FOUND", "GET", { origin: base });
   assert.equal(cors.headers.get("access-control-allow-origin"), base);
   assert.equal((await fetch(`${base}/api/v1/users`, { method: "OPTIONS", headers: { origin: base } })).status, 204);

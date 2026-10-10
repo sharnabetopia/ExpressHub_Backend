@@ -64,8 +64,8 @@ export async function checkAuthRateLimit(
       limit,
       15 * 60 * 1000,
     );
-  } catch (error) {
-    console.error("Authentication rate limit check failed:", error);
+  } catch {
+    console.error("Authentication rate limit check failed");
     throw new AppError(503, "Authentication service is temporarily unavailable", "RATE_LIMIT_UNAVAILABLE");
   }
 

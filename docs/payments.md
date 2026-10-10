@@ -5,7 +5,7 @@ ExpressHub uses Stripe-hosted Checkout for shipment payments. Application routes
 ## Setup
 
 1. Apply committed migrations with `npm run prisma:migrate:deploy`. The `20261005090000_stripe_checkout` migration adds Checkout storage and a partial unique index that permits only one pending/accepted payment per shipment. Retain this index in future migrations (Prisma 5 cannot describe it in the schema).
-2. Set private `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` values. Use one Stripe test account/sandbox for development. Set `STRIPE_SUCCESS_URL` and `STRIPE_CANCEL_URL` to your client's return pages. The example URLs are placeholders; this backend does not implement those pages. Production URLs require HTTPS. Never commit secrets.
+2. Set private `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` values. Use one Stripe test account/sandbox for development. Set `STRIPE_SUCCESS_URL` and `STRIPE_CANCEL_URL` to your client's return pages. The backend provides `/api/v1/payments/return/success` and `/api/v1/payments/return/cancel` as safe JSON return endpoints. Set their origin to your deployed HTTPS domain (localhost HTTP is allowed in development). These routes do not confirm payment or change shipment status. Production URLs require HTTPS. Never commit secrets.
 3. Configure a **snapshot** webhook destination for your own Stripe account at `POST /api/v1/payments/webhook`, subscribing to:
    - `checkout.session.completed`
    - `checkout.session.async_payment_succeeded`
@@ -83,6 +83,8 @@ Open `checkoutUrl` to pay, then query payment detail for its verified status. `c
 ## Verification
 
 ```bash
+npm run stripe:check
+npm run test:checkout-return
 npm run test:payments
 npm run test:payments:integration
 npm run typecheck
@@ -100,3 +102,19 @@ Before deployment, complete a real Stripe **test-mode** acceptance check:
 5. Issue test partial/full refunds in Stripe Dashboard and confirm REFUND_PENDING/REFUNDED locally.
 
 Automated tests do not substitute for this account-specific provider acceptance check. Live charging and a real Stripe test-mode checkout were not performed as part of local automated verification.
+
+## Connecting a public deployment
+
+Use the exact destination `https://<your-domain>/api/v1/payments/webhook`. The unversioned `/api/payments/webhook` is not an ExpressHub endpoint. Subscribe to all eight events listed above, including refund events. Configure the destination's own signing secret in the deployment environment; a different endpoint or Stripe CLI signing secret will not work. Existing signing secrets cannot be retrieved through Stripe's list API.
+
+Set these variables in both your private local environment and hosting environment where applicable:
+
+- `STRIPE_SECRET_KEY`: your test key during acceptance testing.
+- `STRIPE_WEBHOOK_SECRET`: signing secret for that exact public destination.
+- `STRIPE_SUCCESS_URL`: `https://<your-domain>/api/v1/payments/return/success?session_id={CHECKOUT_SESSION_ID}`.
+- `STRIPE_CANCEL_URL`: `https://<your-domain>/api/v1/payments/return/cancel`.
+- `JWT_ACCESS_SECRET`, `DATABASE_URL` and production Upstash variables required by authentication/rate limiting.
+
+Updating `.env` on your computer does not update a hosted deployment. Redeploy after updating hosting variables and code. `npm run stripe:check` performs read-only test-key and webhook-subscription checks without printing secrets; it does not claim to verify webhook signatures or settlement.
+
+For the final hosted acceptance test, create a booking and initiate Checkout through the protected deployed API, pay using a [Stripe test card](https://docs.stripe.com/testing), and inspect payment status and Stripe delivery results. Do not send a locally forged webhook or manually edit PAID as a substitute for provider delivery.

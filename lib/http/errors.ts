@@ -13,6 +13,12 @@ export class AppError extends Error {
   }
 }
 
+export class RateLimitError extends AppError {
+  constructor(public readonly reset: number) {
+    super(429, "Too many requests. Please try again later.", "RATE_LIMITED");
+  }
+}
+
 export function toErrorResponse(error: unknown) {
   if (error instanceof ZodError) {
     return {
